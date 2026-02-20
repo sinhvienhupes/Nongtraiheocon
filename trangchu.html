@@ -3,60 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nông Trại Heo Con - Trang Chủ</title>
+    <title>Nông Trại Heo Con - Đầu Tư</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800;900&display=swap');
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Lexend', sans-serif; background: #f0f2f5; user-select: none; }
-        .bg-header { position: absolute; top: 0; left: 0; width: 100%; height: 240px; background: linear-gradient(135deg, #0f766e, #064e3b); border-radius: 0 0 45px 45px; z-index: 0; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05); }
-        .scroll-area { position: absolute; top: 195px; bottom: 85px; left: 0; width: 100%; overflow-y: auto; padding: 0 16px; z-index: 10; }
+        
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            font-family: 'Lexend', sans-serif;
+            background: #f0f2f5; 
+            user-select: none; -webkit-user-select: none; touch-action: manipulation;
+        }
+
+        .bg-header {
+            position: absolute; top: 0; left: 0; width: 100%; height: 240px;
+            background: linear-gradient(135deg, #0f766e, #064e3b);
+            border-radius: 0 0 45px 45px; z-index: 0;
+            box-shadow: 0 10px 30px rgba(15, 118, 110, 0.3);
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .scroll-area {
+            position: absolute; top: 195px; bottom: 85px; left: 0; width: 100%;
+            overflow-y: auto; padding: 0 16px; z-index: 10;
+        }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* Progress Animation */
         .progress-bg { width: 100%; background: #e5e7eb; border-radius: 999px; height: 12px; overflow: hidden; }
         .progress-fill { height: 100%; border-radius: 999px; transition: width 1s linear; }
-        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; display: flex; justify-content: space-between; align-items: center; z-index: 150; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); border-radius: 24px 24px 0 0; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #9ca3af; padding-top: 5px; }
+
+        /* Navigation */
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; height: 75px;
+            background: white; display: flex; justify-content: space-between;
+            align-items: center; z-index: 150;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
+            padding-bottom: env(safe-area-inset-bottom);
+            border-radius: 24px 24px 0 0;
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: #9ca3af; transition: all 0.2s; padding-top: 5px;
+        }
+        
         .nav-center-wrap { position: relative; flex: 1.2; display: flex; justify-content: center; }
-        .nav-center-btn { position: absolute; top: -30px; width: 65px; height: 65px; background: linear-gradient(135deg, #10b981, #047857); border: 5px solid #f0f2f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
-        #loading-screen { position: fixed; inset: 0; background: #064e3b; z-index: 9999; display: flex; align-items: center; justify-content: center; color: white; transition: opacity 0.2s; }
-        .float-info { position: absolute; pointer-events: none; font-weight: 900; font-size: 18px; text-shadow: 1px 1px 0 #fff; animation: floatUp 1s forwards; z-index: 200; }
+        .nav-center-btn {
+            position: absolute; top: -30px; width: 65px; height: 65px;
+            background: linear-gradient(135deg, #10b981, #047857);
+            border: 5px solid #f0f2f5; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        #loading-screen {
+            position: fixed; inset: 0; background: #064e3b; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+            transition: opacity 0.4s ease;
+        }
+
+        .float-info { 
+            position: absolute; pointer-events: none; font-weight: 900; 
+            font-size: 18px; text-shadow: 1px 1px 0 #fff;
+            animation: floatUp 1s forwards; z-index: 200; 
+        }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-70px); } }
     </style>
 </head>
 <body>
 
-<div id="loading-screen"><h2 class="text-xl font-black animate-pulse tracking-widest text-emerald-300">ĐANG ĐỒNG BỘ...</h2></div>
+<!-- Màn hình load có thời gian chờ tối đa -->
+<div id="loading-screen">
+    <div class="text-6xl animate-bounce mb-4">🚀</div>
+    <h2 class="text-xl font-black tracking-widest text-emerald-300 uppercase">Đang đồng bộ...</h2>
+    <p class="text-xs text-emerald-100/50 mt-2">Vui lòng đợi trong giây lát</p>
+</div>
 
-<div id="game-container" class="relative w-screen h-screen opacity-0 transition-opacity duration-300">
+<div id="game-container" class="relative w-screen h-screen opacity-0 transition-opacity duration-500">
     <div class="bg-header"></div>
+
+    <!-- TOP UI -->
     <div class="absolute top-5 left-0 w-full px-5 flex justify-between items-start z-50">
-        <div>
-            <h1 id="player-name" class="text-white text-base font-black leading-tight">...</h1>
-            <p class="text-emerald-200 text-[10px] font-bold uppercase tracking-wide">Cấp độ <span id="lvl-val">1</span></p>
-            <a href="tk.html" class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-1.5 no-underline mt-2 inline-block">
-                <span id="gold-val" class="font-black text-orange-600 text-lg tracking-tight">0</span> 💰
-            </a>
-        </div>
-        <div class="flex flex-col items-end gap-2">
-            <div class="glass-panel px-3 py-1.5 rounded-xl">
-                <span class="text-[9px] font-bold text-stone-500 uppercase leading-none">Khu dự án</span>
-                <div class="font-black text-emerald-700 text-sm"><span id="slot-used">0</span> / <span id="slot-max">2</span></div>
+        <div class="flex flex-col gap-2">
+            <div>
+                <h1 id="player-name" class="text-white text-base font-black leading-tight truncate max-w-[150px]">Nông Dân</h1>
+                <p class="text-emerald-200 text-[10px] font-bold uppercase tracking-wide">Cấp độ <span id="lvl-val">1</span></p>
             </div>
-            <button id="save-btn" class="glass-panel w-9 h-9 rounded-full flex items-center justify-center shadow-md">💾</button>
+            <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-1.5 border-white/20 shadow-lg">
+                <span class="text-lg">💰</span>
+                <span id="gold-val" class="font-black text-orange-600 text-lg tracking-tight">---</span>
+            </div>
+        </div>
+        
+        <div class="flex flex-col items-end gap-2">
+            <div class="glass-panel px-3 py-1.5 rounded-xl text-right border-white/20">
+                <span class="text-[9px] font-bold text-stone-500 uppercase leading-none">Dự án</span>
+                <div class="font-black text-emerald-700 text-sm">
+                    <span id="slot-used">0</span> / <span id="slot-max">2</span>
+                </div>
+            </div>
+            <button id="save-btn" class="glass-panel w-10 h-10 rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform">
+                💾
+            </button>
         </div>
     </div>
 
+    <!-- TABS -->
     <div class="absolute top-[145px] left-0 w-full px-5 z-20 flex gap-2">
-        <button id="tabMarket" class="flex-1 py-3 rounded-2xl font-black bg-white text-emerald-700 shadow-md">DỰ ÁN MỚI</button>
-        <button id="tabMyFarms" class="flex-1 py-3 rounded-2xl font-bold bg-white/20 text-white backdrop-blur-sm">CỦA TÔI</button>
+        <button id="tab-market" class="flex-1 py-3 rounded-2xl font-black transition-all bg-white text-emerald-700 shadow-md">DỰ ÁN MỚI</button>
+        <button id="tab-myfarms" class="flex-1 py-3 rounded-2xl font-bold transition-all bg-white/20 text-white backdrop-blur-sm">CỦA TÔI</button>
     </div>
 
+    <!-- CONTENT -->
     <div class="scroll-area no-scrollbar" id="main-content"></div>
 
+    <!-- FOOTER NAV -->
     <div class="nav-bar">
         <a href="shop.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">🛍️</span><span class="text-[9px] font-black uppercase tracking-wide">Cửa hàng</span></a>
         <a href="kho.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">📦</span><span class="text-[9px] font-black uppercase tracking-wide">Kho</span></a>
-        <a href="trangchu.html" class="nav-center-wrap text-emerald-700"><div class="nav-center-btn"><span class="text-3xl pb-1">🌱</span></div><span class="text-[10px] font-black uppercase mt-12 tracking-wider">Đầu tư</span></a>
+        <a href="trangchu.html" class="nav-center-wrap text-emerald-700">
+            <div class="nav-center-btn"><span class="text-3xl pb-1">🌱</span></div>
+            <span class="text-[10px] font-black uppercase mt-12 tracking-wider">Đầu tư</span>
+        </a>
         <a href="gt.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">🎮</span><span class="text-[9px] font-black uppercase tracking-wide">Giải trí</span></a>
         <a href="tk.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">👤</span><span class="text-[9px] font-black uppercase tracking-wide">Tài khoản</span></a>
     </div>
@@ -64,7 +138,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -81,6 +155,7 @@
     const db = getFirestore(app);
     const appId = "nongtraiheocon";
 
+    // --- DATA ---
     const PACKAGES = {
         carrot: { id: 'carrot', name: 'Dự án Cà rốt', icon: '🥕', cost: 500, time: 60, exp: 20, yieldName: 'Thùng Cà rốt', yieldQty: 2, bg: 'from-orange-100' },
         cow: { id: 'cow', name: 'Dự án Bò sữa', icon: '🐄', cost: 2000, time: 300, exp: 50, yieldName: 'Thùng Sữa', yieldQty: 1, bg: 'from-sky-100' },
@@ -88,125 +163,220 @@
         sheep: { id: 'sheep', name: 'Dự án Cừu bông', icon: '🐑', cost: 15000, time: 1800, exp: 300, yieldName: 'Kg Bông', yieldQty: 2, bg: 'from-slate-200' }
     };
 
-    let state = { gold: 10000, level: 1, exp: 0, maxProjects: 2, investments: [], inventory: { carrot: 0, cow: 0, chicken: 0, sheep: 0 } };
+    let state = { 
+        gold: 10000, 
+        level: 1, 
+        exp: 0, 
+        maxProjects: 2, 
+        investments: [], 
+        inventory: { carrot: 0, cow: 0, chicken: 0, sheep: 0 } 
+    };
+
     let currentUser = null;
     let currentTab = 'market';
 
+    // Auth & Data Loading
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            await load();
-            start();
-        } else { window.location.href = 'index.html'; }
+            document.getElementById('player-name').innerText = user.displayName || "Nông dân mới";
+            
+            // Timeout 3s cho việc tải dữ liệu từ Cloud
+            const loadPromise = loadData();
+            const timeoutPromise = new Promise(res => setTimeout(res, 3000));
+            
+            await Promise.race([loadPromise, timeoutPromise]);
+            enterGame();
+        } else {
+            // Nếu mất Auth, thử login lại hoặc về index
+            window.location.href = 'index.html';
+        }
     });
 
-    async function load() {
-        // Tuân thủ Rule 1: /artifacts/{appId}/users/{userId}/data/global
-        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'global');
-        const snap = await getDoc(userDocRef);
-        if (snap.exists()) {
-            const d = snap.data();
-            Object.assign(state, d);
-            state.investments = (d.investments || []).filter(i => !i.harvested);
+    async function loadData() {
+        try {
+            const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'global');
+            const snap = await getDoc(userDocRef);
+            if (snap.exists()) {
+                const cloudData = snap.data();
+                // Merge data cẩn thận để tránh mất field mới
+                state = { ...state, ...cloudData };
+                // Lọc bỏ dự án đã đánh dấu hoàn thành
+                state.investments = (state.investments || []).filter(i => !i.harvested);
+                return true;
+            }
+        } catch (e) {
+            console.error("Lỗi đọc Firebase:", e);
         }
-        document.getElementById('player-name').innerText = currentUser.displayName || 'Nông Dân';
+        return false;
     }
 
-    async function save(notif) {
+    async function saveData(silent = true) {
         if(!currentUser) return;
-        const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'global');
-        await setDoc(userDocRef, state, { merge: true });
-        if(notif) showFloat(window.innerWidth/2, 100, "Đã lưu ☁️", "#10b981");
+        try {
+            const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'global');
+            await setDoc(userDocRef, state, { merge: true });
+            if(!silent) showFloat(window.innerWidth/2, 120, "Đã lưu ☁️", "#10b981");
+        } catch(e) { console.error("Lỗi ghi Firebase:", e); }
     }
 
-    function start() {
-        updateUI(); render();
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('game-container').style.opacity = '1';
-        setInterval(updateLoop, 1000);
-        setInterval(() => save(false), 30000);
+    function enterGame() {
+        updateUI();
+        renderContent();
+        
+        const loader = document.getElementById('loading-screen');
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+            document.getElementById('game-container').style.opacity = '1';
+        }, 400);
+
+        setInterval(tick, 1000);
+        setInterval(() => saveData(true), 30000); // Auto save mỗi 30s
     }
 
-    function switchTab(t) {
-        currentTab = t;
-        document.getElementById('tabMarket').className = t==='market' ? "flex-1 py-3 rounded-2xl font-black bg-white text-emerald-700 shadow-md" : "flex-1 py-3 rounded-2xl font-bold bg-white/20 text-white backdrop-blur-sm";
-        document.getElementById('tabMyFarms').className = t==='myfarms' ? "flex-1 py-3 rounded-2xl font-black bg-white text-emerald-700 shadow-md" : "flex-1 py-3 rounded-2xl font-bold bg-white/20 text-white backdrop-blur-sm";
-        render();
-    }
-    document.getElementById('tabMarket').onclick = () => switchTab('market');
-    document.getElementById('tabMyFarms').onclick = () => switchTab('myfarms');
+    // --- UI & RENDER ---
+    const switchTab = (tab) => {
+        currentTab = tab;
+        document.getElementById('tab-market').className = tab === 'market' ? "flex-1 py-3 rounded-2xl font-black bg-white text-emerald-700 shadow-md" : "flex-1 py-3 rounded-2xl font-bold bg-white/20 text-white backdrop-blur-sm";
+        document.getElementById('tab-myfarms').className = tab === 'myfarms' ? "flex-1 py-3 rounded-2xl font-black bg-white text-emerald-700 shadow-md" : "flex-1 py-3 rounded-2xl font-bold bg-white/20 text-white backdrop-blur-sm";
+        renderContent();
+    };
 
-    function render() {
-        const c = document.getElementById('main-content'); c.innerHTML = '';
+    document.getElementById('tab-market').onclick = () => switchTab('market');
+    document.getElementById('tab-myfarms').onclick = () => switchTab('myfarms');
+
+    function renderContent() {
+        const container = document.getElementById('main-content');
+        container.innerHTML = '';
+
         if(currentTab === 'market') {
             const isFull = state.investments.length >= state.maxProjects;
+            
+            // Land expansion card
             if(isFull) {
                 const cost = state.maxProjects * 5000;
-                c.innerHTML += `<div class="bg-orange-50 p-4 rounded-3xl mb-4 text-center border-2 border-orange-200">
-                    <p class="font-black text-orange-700 text-sm mb-2 uppercase">Hết khu dự án trống</p>
-                    <button onclick="window.buyLand(${cost})" class="w-full py-3 bg-orange-600 text-white font-black rounded-xl shadow-lg active:scale-95 transition-all">MỞ RỘNG (+1): ${cost} 💰</button>
+                container.innerHTML += `
+                <div class="bg-orange-50 p-4 rounded-3xl mb-4 border border-orange-200 text-center">
+                    <p class="font-black text-orange-700 text-sm mb-2">HẾT CHỖ TRỐNG DỰ ÁN</p>
+                    <button onclick="window.buySlot(${cost})" class="w-full py-3 bg-orange-500 text-white font-black rounded-xl shadow-lg active:scale-95 transition-all">MỞ RỘNG Ô ĐẤT: ${cost} 💰</button>
                 </div>`;
             }
-            Object.values(PACKAGES).forEach(p => {
-                const canAfford = state.gold >= p.cost;
-                c.innerHTML += `<div class="glass-panel p-4 rounded-[2rem] mb-4 flex flex-col ${isFull?'opacity-50':''}">
-                    <div class="flex gap-4 mb-3">
-                        <div class="w-16 h-16 bg-gradient-to-br ${p.bg} to-white rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white">${p.icon}</div>
-                        <div><h3 class="font-black text-stone-800 text-sm">${p.name}</h3><p class="text-[10px] font-bold text-stone-400 uppercase leading-none">Sản lượng: ${p.yieldQty} ${p.yieldName}</p></div>
+
+            Object.values(PACKAGES).forEach(pkg => {
+                const canBuy = state.gold >= pkg.cost && !isFull;
+                container.innerHTML += `
+                <div class="glass-panel p-4 rounded-[2rem] mb-4 flex flex-col ${!canBuy ? 'opacity-60 grayscale-[0.5]' : ''}">
+                    <div class="flex gap-4 mb-3 items-center">
+                        <div class="w-14 h-14 bg-gradient-to-br ${pkg.bg} to-white rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white">${pkg.icon}</div>
+                        <div>
+                            <h3 class="font-black text-stone-800 text-sm">${pkg.name}</h3>
+                            <p class="text-[10px] font-bold text-stone-400 uppercase">Sản lượng: ${pkg.yieldQty} ${pkg.yieldName}</p>
+                        </div>
                     </div>
-                    <button onclick="window.invest('${p.id}')" ${(!canAfford || isFull)?'disabled':''} class="w-full py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-lg active:scale-95 transition-all">${canAfford ? `ĐẦU TƯ: ${p.cost} 💰` : 'KHÔNG ĐỦ VÀNG'}</button>
+                    <button onclick="window.invest('${pkg.id}')" ${!canBuy ? 'disabled' : ''} class="w-full py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-lg active:scale-95 transition-all">
+                        ${state.gold < pkg.cost ? 'KHÔNG ĐỦ VÀNG' : isFull ? 'ĐÃ HẾT SLOT' : `ĐẦU TƯ: ${pkg.cost.toLocaleString()} 💰`}
+                    </button>
                 </div>`;
             });
         } else {
-            if(state.investments.length === 0) c.innerHTML = `<p class="text-center py-20 font-bold text-stone-400 uppercase tracking-widest opacity-40 text-xs">Chưa có dự án nào đang chạy</p>`;
+            if(state.investments.length === 0) {
+                container.innerHTML = `<div class="py-20 text-center opacity-40"><p class="font-black text-stone-400 text-sm uppercase tracking-widest">Bạn chưa có dự án nào</p></div>`;
+                return;
+            }
             [...state.investments].reverse().forEach(inv => {
                 const p = PACKAGES[inv.pkgId];
-                c.innerHTML += `<div class="glass-panel p-4 rounded-[2rem] mb-4">
-                    <div class="flex justify-between items-center mb-2"><h3 class="font-black text-stone-700 text-sm">${p.name}</h3><span id="time-${inv.id}" class="text-xs font-black text-emerald-600">--:--</span></div>
-                    <div class="progress-bg mb-3"><div id="prog-${inv.id}" class="progress-fill bg-emerald-500" style="width:0%"></div></div>
-                    <button id="btn-${inv.id}" disabled class="w-full py-3 bg-stone-200 text-stone-400 font-black rounded-2xl">ĐANG CHĂM SÓC</button>
+                container.innerHTML += `
+                <div class="glass-panel p-5 rounded-[2rem] mb-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">${p.icon}</span>
+                            <h3 class="font-black text-stone-700 text-sm">${p.name}</h3>
+                        </div>
+                        <span id="time-${inv.id}" class="text-xs font-black text-emerald-600">--:--</span>
+                    </div>
+                    <div class="progress-bg mb-4">
+                        <div id="prog-${inv.id}" class="progress-fill bg-emerald-500 shadow-sm" style="width:0%"></div>
+                    </div>
+                    <button id="btn-${inv.id}" disabled class="w-full py-3.5 bg-stone-100 text-stone-400 font-black rounded-2xl text-xs uppercase tracking-tighter">Đang thực hiện...</button>
                 </div>`;
             });
         }
     }
 
-    window.invest = (id) => {
-        const p = PACKAGES[id];
+    // --- GAME LOGIC ---
+    window.invest = (pkgId) => {
+        const p = PACKAGES[pkgId];
         if(state.gold >= p.cost && state.investments.length < state.maxProjects) {
             state.gold -= p.cost;
-            state.investments.push({ id: Date.now().toString(), pkgId: id, startTime: Date.now(), harvested: false });
-            updateUI(); save(false); switchTab('myfarms');
+            state.investments.push({
+                id: 'inv_' + Date.now() + Math.floor(Math.random()*1000),
+                pkgId: pkgId,
+                startTime: Date.now(),
+                harvested: false
+            });
+            updateUI();
+            saveData(true);
+            switchTab('myfarms');
         }
     };
 
-    window.buyLand = (cost) => {
-        if(state.gold >= cost) { state.gold -= cost; state.maxProjects++; updateUI(); save(false); render(); }
+    window.buySlot = (cost) => {
+        if(state.gold >= cost) {
+            state.gold -= cost;
+            state.maxProjects++;
+            updateUI();
+            saveData(false);
+            renderContent();
+        }
     };
 
-    function updateLoop() {
+    function tick() {
         if(currentTab !== 'myfarms') return;
         const now = Date.now();
         state.investments.forEach(inv => {
-            const p = PACKAGES[inv.pkgId];
+            const pkg = PACKAGES[inv.pkgId];
+            if(!pkg) return;
             const elapsed = (now - inv.startTime) / 1000;
-            const pct = Math.min(100, (elapsed / p.time) * 100);
+            const pct = Math.min(100, (elapsed / pkg.time) * 100);
+            
             const bar = document.getElementById(`prog-${inv.id}`);
             const btn = document.getElementById(`btn-${inv.id}`);
             const txt = document.getElementById(`time-${inv.id}`);
+
             if(bar) bar.style.width = pct + '%';
-            if(txt) txt.innerText = pct >= 100 ? "Xong!" : Math.ceil(p.time - elapsed) + "s";
+            if(txt) txt.innerText = pct >= 100 ? "Hoàn tất!" : Math.ceil(pkg.time - elapsed) + " giây";
+            
             if(pct >= 100 && btn && btn.disabled) {
-                btn.disabled = false; btn.innerText = "THU HOẠCH"; btn.className = "w-full py-3 bg-emerald-600 text-white font-black rounded-2xl shadow-lg";
-                btn.onclick = () => {
-                    state.inventory[inv.pkgId] = (state.inventory[inv.pkgId] || 0) + p.yieldQty;
-                    state.exp += p.exp;
-                    state.investments = state.investments.filter(i => i.id !== inv.id);
-                    // Level up
-                    if(state.exp >= state.level * 100) { state.exp -= state.level*100; state.level++; state.gold += 1000; }
-                    updateUI(); save(false); render();
-                };
+                btn.disabled = false;
+                btn.innerText = `THU HOẠCH ${pkg.yieldQty} ${pkg.yieldName.toUpperCase()}`;
+                btn.className = "w-full py-3.5 bg-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-100 active:scale-95 transition-all text-xs";
+                btn.onclick = () => harvest(inv.id);
             }
         });
+    }
+
+    function harvest(invId) {
+        const inv = state.investments.find(i => i.id === invId);
+        if(!inv) return;
+        const pkg = PACKAGES[inv.pkgId];
+
+        state.inventory[inv.pkgId] = (state.inventory[inv.pkgId] || 0) + pkg.yieldQty;
+        state.exp += pkg.exp;
+        state.investments = state.investments.filter(i => i.id !== invId);
+
+        // Level up
+        if(state.exp >= state.level * 100) {
+            state.exp -= state.level * 100;
+            state.level++;
+            state.gold += 1000;
+            alert(`🎉 Chúc mừng! Bạn lên cấp ${state.level} và nhận 1.000 Vàng!`);
+        }
+
+        updateUI();
+        saveData(true);
+        renderContent();
+        showFloat(window.innerWidth/2, 150, `+${pkg.yieldQty} ${pkg.yieldName}`, "#10b981");
     }
 
     function updateUI() {
@@ -216,9 +386,14 @@
         document.getElementById('slot-max').innerText = state.maxProjects;
     }
 
-    document.getElementById('save-btn').onclick = () => save(true);
+    document.getElementById('save-btn').onclick = () => saveData(false);
+
     function showFloat(x, y, t, c) {
-        const d = document.createElement('div'); d.className = 'float-info'; d.innerText = t; d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.color = c; document.body.appendChild(d); setTimeout(() => d.remove(), 1000);
+        const d = document.createElement('div');
+        d.className = 'float-info'; d.innerText = t;
+        d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.color = c;
+        document.body.appendChild(d);
+        setTimeout(() => d.remove(), 1000);
     }
 </script>
 </body>
