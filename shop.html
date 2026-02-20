@@ -3,415 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nông Trại Heo Con - Cửa Hàng & Chợ</title>
+    <title>Nông Trại Heo Con - Cửa Hàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800;900&display=swap');
-        
-        body {
-            margin: 0; padding: 0; overflow: hidden;
-            font-family: 'Lexend', sans-serif;
-            background: #f8fafc; 
-            user-select: none; -webkit-user-select: none; touch-action: manipulation;
-        }
-
-        .bg-header {
-            position: absolute; top: 0; left: 0; width: 100%; height: 200px;
-            background: linear-gradient(135deg, #065f46, #064e3b);
-            border-radius: 0 0 50px 50px; z-index: 0;
-            box-shadow: 0 10px 30px rgba(6, 78, 59, 0.2);
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        .scroll-area {
-            position: absolute; top: 210px; bottom: 85px; left: 0; width: 100%;
-            overflow-y: auto; padding: 0 16px; z-index: 10;
-        }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Lexend', sans-serif; background: #f8fafc; }
+        .bg-header { position: absolute; top: 0; left: 0; width: 100%; height: 200px; background: linear-gradient(135deg, #065f46, #064e3b); border-radius: 0 0 50px 50px; z-index: 0; }
+        .glass-panel { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.8); }
+        .scroll-area { position: absolute; top: 210px; bottom: 85px; left: 0; width: 100%; overflow-y: auto; padding: 0 16px; z-index: 10; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-
-        .nav-bar {
-            position: fixed; bottom: 0; width: 100%; height: 75px;
-            background: white; display: flex; justify-content: space-between;
-            align-items: center; z-index: 150;
-            box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
-            border-radius: 24px 24px 0 0;
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-decoration: none; color: #9ca3af; transition: all 0.2s; padding-top: 5px;
-        }
-        
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: white; display: flex; justify-content: space-between; align-items: center; z-index: 150; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); border-radius: 24px 24px 0 0; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #9ca3af; padding-top: 5px; }
         .nav-center-wrap { position: relative; flex: 1.2; display: flex; justify-content: center; }
-        .nav-center-btn {
-            position: absolute; top: -30px; width: 65px; height: 65px;
-            background: linear-gradient(135deg, #10b981, #047857);
-            border: 5px solid #f8fafc; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
-        }
-
+        .nav-center-btn { position: absolute; top: -30px; width: 65px; height: 65px; background: linear-gradient(135deg, #10b981, #047857); border: 5px solid #fdfdfd; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .tab-btn { transition: all 0.3s; border-radius: 15px; font-weight: 800; font-size: 13px; }
         .tab-active { background: white; color: #065f46; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-
-        #post-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
-            backdrop-filter: blur(4px);
-        }
+        #post-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
         #post-modal.active { display: flex; }
-
-        .float-info { 
-            position: absolute; pointer-events: none; font-weight: 900; 
-            font-size: 20px; text-shadow: 1px 1px 0 #fff;
-            animation: floatUp 1s ease-out forwards; z-index: 200; 
-        }
-        @keyframes floatUp { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 1; transform: translateY(-20px); } 100% { opacity: 0; transform: translateY(-80px); } }
-
-        #loading-screen {
-            position: fixed; inset: 0; background: #064e3b; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
-        }
     </style>
 </head>
 <body>
-
-<div id="loading-screen">
-    <div class="text-6xl animate-bounce mb-3">🏪</div>
-    <h2 class="text-xl font-black mb-1 tracking-widest text-emerald-300">ĐANG KẾT NỐI...</h2>
-</div>
-
-<div id="game-container" class="relative w-screen h-screen opacity-0 transition-opacity duration-300">
     <div class="bg-header"></div>
-    
-    <!-- Header -->
-    <div class="absolute top-5 left-0 w-full px-6 flex justify-between items-center z-50">
-        <div>
-            <h1 class="text-white text-2xl font-black tracking-tight">Cửa Hàng</h1>
-            <p class="text-emerald-200 text-[10px] font-bold uppercase tracking-widest">Giao dịch thời gian thực</p>
-        </div>
-        <div class="glass-panel px-4 py-2 rounded-2xl flex items-center gap-2 border-emerald-100/50">
-            <span class="text-xl">💰</span>
-            <span id="gold-val" class="font-black text-orange-600 text-lg">---</span>
-        </div>
+    <div class="absolute top-5 left-0 w-full px-6 flex justify-between items-center z-50 text-white">
+        <h1 class="text-2xl font-black">Cửa Hàng</h1>
+        <div class="glass-panel px-4 py-2 rounded-2xl text-emerald-800 font-black"><span id="gold-val">0</span> 💰</div>
     </div>
-
-    <!-- Tabs -->
     <div class="absolute top-[100px] left-0 w-full px-5 z-20">
-        <div class="bg-black/20 backdrop-blur-md p-1.5 rounded-[1.5rem] flex gap-1 border border-white/10">
-            <button id="tab-quick" class="tab-btn flex-1 py-3 tab-active">BÁN NHANH</button>
-            <button id="tab-market" class="tab-btn flex-1 py-3 text-white/70">CHỢ NÔNG DÂN</button>
-        </div>
-        
-        <button id="btn-open-post" class="hidden w-full mt-3 bg-orange-500 text-white py-3.5 rounded-2xl font-black shadow-lg shadow-orange-200 active:scale-95 transition-all">
-            📦 ĐĂNG BÁN NÔNG PHẨM
-        </button>
+        <div class="bg-black/20 p-1.5 rounded-[1.5rem] flex gap-1 border border-white/10"><button id="tabQuick" class="tab-btn flex-1 py-3 tab-active">BÁN NHANH</button><button id="tabMarket" class="tab-btn flex-1 py-3 text-white/70">CHỢ CỘNG ĐỒNG</button></div>
+        <button id="btnOpenPost" class="hidden w-full mt-3 bg-orange-500 text-white py-3.5 rounded-2xl font-black shadow-lg">📦 ĐĂNG BÁN NÔNG PHẨM</button>
     </div>
-
-    <!-- Content List -->
-    <div class="scroll-area no-scrollbar" id="content-list"></div>
+    <div class="scroll-area no-scrollbar" id="content"></div>
 
     <!-- Modal Post -->
     <div id="post-modal">
-        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-orange-500"></div>
-            <h2 class="text-xl font-black text-stone-800 mb-5">Rao bán lên Chợ</h2>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black text-stone-400 uppercase mb-1.5 ml-1 tracking-wider">Sản phẩm có sẵn</label>
-                    <select id="post-item-id" class="w-full bg-stone-100 p-4 rounded-2xl border-none font-bold text-stone-700 outline-none ring-offset-2 focus:ring-2 focus:ring-orange-500 transition-all"></select>
-                </div>
-                
-                <div class="flex gap-3">
-                    <div class="flex-1">
-                        <label class="block text-[10px] font-black text-stone-400 uppercase mb-1.5 ml-1 tracking-wider">Số lượng</label>
-                        <input type="number" id="post-item-qty" value="1" min="1" class="w-full bg-stone-100 p-4 rounded-2xl font-black text-stone-700 outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-[10px] font-black text-stone-400 uppercase mb-1.5 ml-1 tracking-wider">Giá / 1 đv</label>
-                        <input type="number" id="post-item-price" placeholder="💰" class="w-full bg-stone-100 p-4 rounded-2xl font-black text-stone-700 outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                </div>
-                
-                <div class="bg-orange-50 p-3 rounded-xl">
-                    <p class="text-[10px] text-orange-600 font-bold leading-tight">Mẹo: Đăng bán giá cao hơn "Bán nhanh" một chút để tối ưu lợi nhuận!</p>
-                </div>
-                
-                <div class="flex gap-2 pt-2">
-                    <button onclick="document.getElementById('post-modal').classList.remove('active')" class="flex-1 py-4 bg-stone-100 text-stone-500 font-black rounded-2xl">HỦY</button>
-                    <button id="confirm-post-btn" class="flex-[2] py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-100 active:scale-95 transition-transform">ĐĂNG BÁN</button>
-                </div>
+        <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-6 shadow-2xl">
+            <h2 class="text-xl font-black mb-5">Rao bán lên Chợ</h2>
+            <select id="p-id" class="w-full bg-stone-100 p-4 rounded-2xl mb-4 font-bold outline-none"></select>
+            <div class="flex gap-3 mb-4">
+                <input type="number" id="p-qty" value="1" class="flex-1 bg-stone-100 p-4 rounded-2xl font-black" placeholder="SL">
+                <input type="number" id="p-price" class="flex-1 bg-stone-100 p-4 rounded-2xl font-black" placeholder="Giá/1đv">
             </div>
+            <div class="flex gap-2"><button onclick="document.getElementById('post-modal').classList.remove('active')" class="flex-1 py-4 bg-stone-100 font-black rounded-2xl uppercase text-xs">Hủy</button><button id="p-confirm" class="flex-[2] py-4 bg-emerald-600 text-white font-black rounded-2xl shadow-lg uppercase text-xs">Đăng bán</button></div>
         </div>
     </div>
 
-    <!-- Navigation -->
     <div class="nav-bar">
         <a href="shop.html" class="nav-item text-emerald-600"><span class="text-2xl mb-1">🛍️</span><span class="text-[9px] font-black uppercase tracking-wide">Cửa hàng</span></a>
         <a href="kho.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">📦</span><span class="text-[9px] font-black uppercase tracking-wide">Kho</span></a>
-        <a href="trangchu.html" class="nav-center-wrap"><div class="nav-center-btn"><span class="text-3xl pb-1 opacity-80">🌱</span></div><span class="text-[10px] font-black uppercase mt-12 tracking-wider text-stone-400">Đầu tư</span></a>
+        <a href="trangchu.html" class="nav-center-wrap"><div class="nav-center-btn"><span class="text-3xl opacity-80">🌱</span></div><span class="text-[10px] mt-12 font-black text-stone-400">Đầu tư</span></a>
         <a href="gt.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">🎮</span><span class="text-[9px] font-black uppercase tracking-wide">Giải trí</span></a>
         <a href="tk.html" class="nav-item"><span class="text-2xl mb-1 grayscale opacity-60">👤</span><span class="text-[9px] font-black uppercase tracking-wide">Tài khoản</span></a>
     </div>
-</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, onSnapshot, addDoc, deleteDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAQa6awFxFTOrRXPnda8rS6vlKLKPDMJT0",
-      authDomain: "nongtraiheocon.firebaseapp.com",
-      projectId: "nongtraiheocon",
-      storageBucket: "nongtraiheocon.firebasestorage.app",
-      messagingSenderId: "964519162656",
-      appId: "1:964519162656:web:27247ed6287dfc74ef5d45",
-      measurementId: "G-RT8HPTJERF"
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyAQa6awFxFTOrRXPnda8rS6vlKLKPDMJT0", authDomain: "nongtraiheocon.firebaseapp.com", projectId: "nongtraiheocon", storageBucket: "nongtraiheocon.firebasestorage.app", messagingSenderId: "964519162656", appId: "1:964519162656:web:27247ed6287dfc74ef5d45" };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const appId = "nongtraiheocon";
 
-    const ITEMS_DATA = {
-        carrot: { name: 'Cà rốt', icon: '🥕', quickPrice: 350, bg: 'bg-orange-100' },
-        cow: { name: 'Sữa tươi', icon: '🥛', quickPrice: 2800, bg: 'bg-sky-100' },
-        chicken: { name: 'Trứng gà', icon: '🥚', quickPrice: 1800, bg: 'bg-yellow-100' },
-        sheep: { name: 'Bông vải', icon: '☁️', quickPrice: 9500, bg: 'bg-slate-100' }
-    };
+    const INFO = { carrot: { n: 'Cà rốt', i: '🥕', q: 350, b: 'bg-orange-100' }, cow: { n: 'Sữa tươi', i: '🥛', q: 2800, b: 'bg-sky-100' }, chicken: { n: 'Trứng gà', i: '🥚', q: 1800, b: 'bg-yellow-100' }, sheep: { n: 'Bông vải', i: '☁️', q: 9500, b: 'bg-slate-100' } };
+    let uState = { gold: 0, inventory: {} };
+    let curTab = 'quick';
+    let unsub = null;
 
-    let userState = { gold: 0, inventory: {}, displayName: "" };
-    let currentUser = null;
-    let currentTab = 'quick';
-    let marketUnsubscribe = null;
-
-    // Khởi tạo
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            await refreshUserData();
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('game-container').style.opacity = '1';
-            switchTab('quick');
-        } else {
-            window.location.href = 'index.html';
-        }
+    onAuthStateChanged(auth, async (u) => {
+        if(u) { await load(); switchTab('quick'); } else window.location.href = 'index.html';
     });
 
-    async function refreshUserData() {
-        const snap = await getDoc(doc(db, "users", currentUser.uid));
-        if (snap.exists()) {
-            userState = { ...userState, ...snap.data() };
-            document.getElementById('gold-val').innerText = userState.gold.toLocaleString();
-        }
+    async function load() {
+        // Tuân thủ Rule 1: /artifacts/{appId}/users/{userId}/data/global
+        const snap = await getDoc(doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'data', 'global'));
+        if(snap.exists()) { uState = snap.data(); document.getElementById('gold-val').innerText = (uState.gold || 0).toLocaleString(); }
     }
 
-    async function syncCloud() {
-        if (!currentUser) return;
-        await setDoc(doc(db, "users", currentUser.uid), {
-            gold: userState.gold,
-            inventory: userState.inventory
-        }, { merge: true });
+    async function sync() {
+        const userDocRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'data', 'global');
+        await setDoc(userDocRef, uState, { merge: true });
     }
 
-    // --- Tab Logic ---
-    window.switchTab = (tab) => {
-        currentTab = tab;
-        const quickBtn = document.getElementById('tab-quick');
-        const marketBtn = document.getElementById('tab-market');
-        const postBtn = document.getElementById('btn-open-post');
-        
-        if (tab === 'quick') {
-            quickBtn.className = "tab-btn flex-1 py-3 tab-active";
-            marketBtn.className = "tab-btn flex-1 py-3 text-white/70";
-            postBtn.classList.add('hidden');
-            renderQuickSell();
-            if (marketUnsubscribe) marketUnsubscribe();
-        } else {
-            marketBtn.className = "tab-btn flex-1 py-3 tab-active";
-            quickBtn.className = "tab-btn flex-1 py-3 text-white/70";
-            postBtn.classList.remove('hidden');
-            renderMarketplace();
-        }
+    window.switchTab = (t) => {
+        curTab = t;
+        document.getElementById('tabQuick').className = t==='quick' ? "tab-btn flex-1 py-3 tab-active" : "tab-btn flex-1 py-3 text-white/70";
+        document.getElementById('tabMarket').className = t==='market' ? "tab-btn flex-1 py-3 tab-active" : "tab-btn flex-1 py-3 text-white/70";
+        document.getElementById('btnOpenPost').classList.toggle('hidden', t==='quick');
+        if(t==='quick') renderQuick(); else listenMarket();
     };
+    document.getElementById('tabQuick').onclick = () => switchTab('quick');
+    document.getElementById('tabMarket').onclick = () => switchTab('market');
 
-    document.getElementById('tab-quick').onclick = () => switchTab('quick');
-    document.getElementById('tab-market').onclick = () => switchTab('market');
-
-    // --- Bán Nhanh (Merchant) ---
-    function renderQuickSell() {
-        const container = document.getElementById('content-list');
-        container.innerHTML = '';
-        const items = Object.entries(userState.inventory).filter(([id, qty]) => qty > 0 && ITEMS_DATA[id]);
-
-        if (items.length === 0) {
-            container.innerHTML = `<div class="flex flex-col items-center justify-center py-20 opacity-30 text-center"><span class="text-7xl mb-4">🏪</span><p class="font-black text-stone-600 text-sm">KHO ĐANG TRỐNG</p></div>`;
-            return;
-        }
-
-        items.forEach(([id, qty]) => {
-            const info = ITEMS_DATA[id];
-            const card = document.createElement('div');
-            card.className = "glass-panel p-4 rounded-[2rem] flex items-center gap-4 mb-4";
-            card.innerHTML = `
-                <div class="w-16 h-16 ${info.bg} rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white/50">${info.icon}</div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-black text-stone-800 text-sm leading-tight truncate">${info.name}</h3>
-                    <p class="text-xs font-bold text-emerald-600 mt-0.5">Giá: ${info.quickPrice} 💰</p>
-                    <p class="text-[10px] text-stone-400 font-bold uppercase mt-1">Trong kho: ${qty}</p>
-                </div>
-                <button onclick="window.doQuickSell('${id}', event)" class="bg-emerald-600 text-white font-black text-xs py-2.5 px-5 rounded-xl shadow-md active:scale-90 transition-all">BÁN</button>
-            `;
-            container.appendChild(card);
+    function renderQuick() {
+        const c = document.getElementById('content'); c.innerHTML = '';
+        const its = Object.entries(uState.inventory || {}).filter(([id, q]) => q > 0 && INFO[id]);
+        if(its.length===0) c.innerHTML = `<p class="text-center py-20 opacity-30 font-black text-xs">KHÔNG CÓ HÀNG ĐỂ BÁN NHANH</p>`;
+        its.forEach(([id, q]) => {
+            const it = INFO[id];
+            c.innerHTML += `<div class="glass-panel p-4 rounded-[2rem] flex items-center gap-4 mb-4">
+                <div class="w-16 h-16 ${it.b} rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white">${it.i}</div>
+                <div class="flex-1 min-w-0"><h3 class="font-black text-sm text-stone-800">${it.n}</h3><p class="text-xs font-bold text-emerald-600">Thương lái mua: ${it.q} 💰</p><p class="text-[10px] font-bold text-stone-400">Kho: ${q}</p></div>
+                <button onclick="window.doSell('${id}')" class="bg-emerald-600 text-white font-black text-xs py-2.5 px-5 rounded-xl shadow-md active:scale-95 transition-all">BÁN</button>
+            </div>`;
         });
     }
 
-    window.doQuickSell = async (id, e) => {
-        if (userState.inventory[id] > 0) {
-            const earn = ITEMS_DATA[id].quickPrice;
-            userState.inventory[id] -= 1;
-            userState.gold += earn;
-            
-            document.getElementById('gold-val').innerText = userState.gold.toLocaleString();
-            renderQuickSell();
-            showFloat(e.target.getBoundingClientRect().left, e.target.getBoundingClientRect().top, `+${earn} 💰`, "#f59e0b");
-            await syncCloud();
+    window.doSell = async (id) => {
+        if(uState.inventory[id] > 0) {
+            uState.inventory[id]--; uState.gold += INFO[id].q;
+            document.getElementById('gold-val').innerText = uState.gold.toLocaleString();
+            renderQuick(); await sync();
         }
     };
 
-    // --- Chợ Cộng Đồng (Marketplace) ---
-    function renderMarketplace() {
-        const container = document.getElementById('content-list');
-        const q = collection(db, 'artifacts', appId, 'public', 'data', 'market');
-        
-        marketUnsubscribe = onSnapshot(q, (snapshot) => {
-            container.innerHTML = '';
-            const docs = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-
-            if (docs.length === 0) {
-                container.innerHTML = `<div class="flex flex-col items-center justify-center py-20 opacity-30 text-center"><span class="text-7xl mb-4">🛒</span><p class="font-black text-stone-600 text-sm">CHỢ CHƯA CÓ HÀNG</p></div>`;
-                return;
-            }
-
-            docs.forEach(item => {
-                const info = ITEMS_DATA[item.itemType];
-                if(!info) return;
-                const isMine = item.sellerId === currentUser.uid;
-                const card = document.createElement('div');
-                card.className = `glass-panel p-4 rounded-[2rem] flex items-center gap-4 mb-4 ${isMine ? 'border-orange-200 bg-orange-50/20' : ''}`;
-                card.innerHTML = `
-                    <div class="w-16 h-16 ${info.bg} rounded-2xl flex items-center justify-center text-3xl shrink-0">${info.icon}</div>
-                    <div class="flex-1 min-w-0">
-                        <h3 class="font-black text-stone-800 text-sm truncate">${item.quantity} ${info.name}</h3>
-                        <p class="text-xs font-bold text-orange-600">Tổng: ${item.totalPrice.toLocaleString()} 💰</p>
-                        <p class="text-[9px] text-stone-400 font-bold uppercase truncate mt-1">Bán bởi: ${isMine ? 'Bạn' : item.sellerName}</p>
-                    </div>
-                    ${isMine ? 
-                        `<button onclick="window.cancelMarketPost('${item.id}', '${item.itemType}', ${item.quantity})" class="bg-stone-100 text-stone-400 font-black text-[10px] py-2 px-3 rounded-xl">HỦY</button>` :
-                        `<button onclick="window.buyFromMarket('${item.id}', event)" class="bg-orange-500 text-white font-black text-xs py-2.5 px-5 rounded-xl shadow-md active:scale-90 transition-all">MUA</button>`
-                    }
-                `;
-                container.appendChild(card);
+    function listenMarket() {
+        if(unsub) unsub();
+        // Tuân thủ Rule 1: /artifacts/{appId}/public/data/market
+        unsub = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'market'), s => {
+            const c = document.getElementById('content'); c.innerHTML = '';
+            const docs = s.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => b.timestamp - a.timestamp);
+            if(docs.length===0) c.innerHTML = `<p class="text-center py-20 opacity-30 font-black text-xs uppercase tracking-widest">Chợ chưa có hàng</p>`;
+            docs.forEach(it => {
+                const mine = it.sellerId === auth.currentUser.uid;
+                const meta = INFO[it.itemType];
+                c.innerHTML += `<div class="glass-panel p-4 rounded-[2rem] flex items-center gap-4 mb-4 ${mine?'border-orange-200 bg-orange-50/10':''}">
+                    <div class="w-14 h-14 ${meta.b} rounded-2xl flex items-center justify-center text-3xl shadow-inner">${meta.i}</div>
+                    <div class="flex-1 min-w-0"><h3 class="font-black text-sm">${it.quantity} ${meta.n}</h3><p class="text-xs font-bold text-orange-600">Tổng: ${it.totalPrice} 💰</p><p class="text-[9px] text-stone-400 font-bold uppercase truncate">${mine?'Bạn đăng':it.sellerName}</p></div>
+                    ${mine?`<button onclick="window.cancel('${it.id}','${it.itemType}',${it.quantity})" class="text-[10px] font-black text-stone-300">HỦY</button>`:`<button onclick="window.buy('${it.id}')" class="bg-orange-500 text-white font-black text-xs py-2.5 px-4 rounded-xl shadow-lg active:scale-95">MUA</button>`}
+                </div>`;
             });
         });
     }
 
-    // Đăng bán
-    document.getElementById('btn-open-post').onclick = () => {
-        const select = document.getElementById('post-item-id');
-        select.innerHTML = '';
-        Object.entries(userState.inventory).forEach(([id, qty]) => {
-            if (qty > 0 && ITEMS_DATA[id]) {
-                const opt = document.createElement('option');
-                opt.value = id;
-                opt.textContent = `${ITEMS_DATA[id].name} (Sẵn có: ${qty})`;
-                select.appendChild(opt);
-            }
-        });
-
-        if (select.options.length === 0) {
-            alert("Bạn không có nông sản để rao bán!");
-            return;
-        }
-        document.getElementById('post-modal').classList.add('active');
+    document.getElementById('btnOpenPost').onclick = () => {
+        const s = document.getElementById('p-id'); s.innerHTML = '';
+        Object.entries(uState.inventory).forEach(([id, q]) => { if(q>0) s.innerHTML += `<option value="${id}">${INFO[id].n} (Sẵn có: ${q})</option>`; });
+        if(s.options.length > 0) document.getElementById('post-modal').classList.add('active');
     };
 
-    document.getElementById('confirm-post-btn').onclick = async () => {
-        const itemId = document.getElementById('post-item-id').value;
-        const qty = parseInt(document.getElementById('post-item-qty').value);
-        const price = parseInt(document.getElementById('post-item-price').value);
-
-        if (!qty || qty <= 0 || !price || price <= 0) return alert("Vui lòng nhập số lượng và giá!");
-        if (userState.inventory[itemId] < qty) return alert("Không đủ hàng trong kho!");
-
-        // Trừ kho ngay lập tức
-        userState.inventory[itemId] -= qty;
-        await syncCloud();
-
-        // Đẩy lên chợ công khai
-        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'market'), {
-            sellerId: currentUser.uid,
-            sellerName: userState.displayName || "Nông Dân",
-            itemType: itemId,
-            quantity: qty,
-            pricePerUnit: price,
-            totalPrice: qty * price,
-            timestamp: serverTimestamp()
-        });
-
-        document.getElementById('post-modal').classList.remove('active');
-    };
-
-    window.buyFromMarket = async (docId, e) => {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'market', docId);
-        const snap = await getDoc(docRef);
-        
-        if (!snap.exists()) return alert("Hàng đã bị người khác mua hoặc gỡ bỏ!");
-        
-        const item = snap.data();
-        if (userState.gold < item.totalPrice) return alert("Bạn không đủ Vàng!");
-
-        // 1. Trừ tiền người mua, cộng vật phẩm
-        userState.gold -= item.totalPrice;
-        userState.inventory[item.itemType] = (userState.inventory[item.itemType] || 0) + item.quantity;
-        await syncCloud();
-
-        // 2. Cộng tiền cho người bán
-        await updateDoc(doc(db, 'users', item.sellerId), {
-            gold: increment(item.totalPrice)
-        });
-
-        // 3. Xóa bài đăng
-        await deleteDoc(docRef);
-        
-        document.getElementById('gold-val').innerText = userState.gold.toLocaleString();
-        showFloat(e.target.getBoundingClientRect().left, e.target.getBoundingClientRect().top, `-${item.totalPrice} 💰`, "red");
-        alert("Mua hàng thành công!");
-    };
-
-    window.cancelMarketPost = async (docId, type, qty) => {
-        if(confirm("Hủy đăng bán và nhận lại hàng?")) {
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'market', docId));
-            userState.inventory[type] = (userState.inventory[type] || 0) + qty;
-            await syncCloud();
+    document.getElementById('p-confirm').onclick = async () => {
+        const id = document.getElementById('p-id').value; const q = parseInt(document.getElementById('p-qty').value); const p = parseInt(document.getElementById('p-price').value);
+        if(q > 0 && p > 0 && uState.inventory[id] >= q) {
+            uState.inventory[id] -= q; await sync();
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'market'), { sellerId: auth.currentUser.uid, sellerName: auth.currentUser.displayName || "Nông Dân", itemType: id, quantity: q, totalPrice: q*p, timestamp: serverTimestamp() });
+            document.getElementById('post-modal').classList.remove('active');
         }
     };
 
-    function showFloat(x, y, txt, color) {
-        const div = document.createElement('div');
-        div.className = 'float-info'; div.innerText = txt;
-        div.style.left = x + 'px'; div.style.top = y + 'px'; div.style.color = color;
-        document.body.appendChild(div);
-        setTimeout(() => div.remove(), 1000);
-    }
+    window.buy = async (did) => {
+        const r = doc(db, 'artifacts', appId, 'public', 'data', 'market', did); const s = await getDoc(r);
+        if(s.exists()) {
+            const it = s.data();
+            if(uState.gold >= it.totalPrice) {
+                uState.gold -= it.totalPrice; uState.inventory[it.itemType] = (uState.inventory[it.itemType]||0) + it.quantity;
+                await sync();
+                const sellerGlobalRef = doc(db, 'artifacts', appId, 'users', it.sellerId, 'data', 'global');
+                await updateDoc(sellerGlobalRef, { gold: increment(it.totalPrice) });
+                await deleteDoc(r);
+                alert("Đã mua thành công!");
+            } else alert("Bạn không đủ Vàng!");
+        }
+    };
+
+    window.cancel = async (did, type, q) => {
+        if(confirm("Hủy tin và nhận lại hàng?")) {
+            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'market', did));
+            uState.inventory[type] = (uState.inventory[type]||0) + q; await sync();
+        }
+    };
 </script>
 </body>
 </html>
