@@ -11,7 +11,7 @@
         body {
             margin: 0; padding: 0; overflow: hidden;
             font-family: 'Lexend', sans-serif;
-            background: linear-gradient(135deg, #2d6a4f, #1b4332); /* Nền xanh cỏ đậm */
+            background: #113624; /* Xanh lá thẫm làm nền */
             user-select: none; -webkit-user-select: none; touch-action: none;
         }
 
@@ -31,13 +31,11 @@
         }
         .tool-item {
             width: 50px; height: 50px; border-radius: 14px; 
-            display: flex; align-items: center; justify-content: center; font-size: 22px;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
             background: white; border: 2px solid transparent; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; overflow: hidden;
+            position: relative; overflow: visible;
         }
-        /* Icon hình ảnh trong Tool Tray */
-        .tool-icon { width: 36px; height: 36px; object-fit: contain; }
         
         .tool-item.selected { 
             border-color: #f59e0b; transform: translateY(-8px) scale(1.1); 
@@ -89,48 +87,19 @@
 
         /* Loader */
         #loading-screen {
-            position: fixed; inset: 0; background: #1b4332; z-index: 9999;
+            position: fixed; inset: 0; background: #113624; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
             transition: opacity 0.5s;
         }
-        .asset-preload { display: none; }
     </style>
 </head>
 <body>
 
-<!-- Preload Hình Ảnh (Để tránh giật lag khi vẽ) -->
-<div class="asset-preload">
-    <!-- Tiles Môi trường -->
-    <img id="img-grass" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/grass_tile.png" alt="Cỏ" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iIzQzYTA0NyIvPjwvc3ZnPg=='" />
-    <img id="img-soil-1" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/soil_tile.png" alt="Đất thường" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iIzhiNWEyYiIvPjwvc3ZnPg=='"/>
-    <img id="img-soil-2" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/soil_rich_tile.png" alt="Đất tốt" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iI2E2N2I1YiIvPjwvc3ZnPg=='"/>
-    <img id="img-soil-locked" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/stone_tile.png" alt="Đất khóa" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iIzRhNTU2OCIvPjwvc3ZnPg=='"/>
-    <img id="img-highlight" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/highlight.png" alt="Highlight" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4='"/>
-    
-    <!-- Các Giai Đoạn Của Ngô (Corn) -->
-    <img id="img-corn-1" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/seedling.png" alt="Mầm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4yxPC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="img-corn-2" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/corn_growing.png" alt="Ngô non" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4y/PC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="img-corn-3" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/corn_ready.png" alt="Ngô chín" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn309PC90ZXh0Pjwvc3ZnPg=='"/>
-
-    <!-- Các Giai Đoạn Của Bí Ngô (Pumpkin) -->
-    <img id="img-pumpkin-1" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/seedling.png" alt="Mầm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4yxPC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="img-pumpkin-2" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/pumpkin_growing.png" alt="Bí non" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4y/PC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="img-pumpkin-3" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/pumpkin_ready.png" alt="Bí chín" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn46DPC90ZXh0Pjwvc3ZnPg=='"/>
-
-    <!-- Tools -->
-    <img id="icon-hand" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/cursor.png" alt="Hand" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wnZWePC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="icon-scythe" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/scythe.png" alt="Scythe" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wn6eaPC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="icon-water" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/watering_can.png" alt="Water" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wnZKnPC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="icon-fertilizer" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/fertilizer.png" alt="Fertilizer" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wnZSpPC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="icon-seed" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/seed_bag.png" alt="Seed" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wn4yxPC90ZXh0Pjwvc3ZnPg=='"/>
-    <img id="icon-hoe" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/hoe.png" alt="Hoe" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wn5SoPC90ZXh0Pjwvc3ZnPg=='"/>
-</div>
-
 <!-- Màn hình tải -->
 <div id="loading-screen">
-    <div class="text-6xl animate-bounce mb-4" id="loading-icon">🐷</div>
-    <h2 class="text-2xl font-black mb-2 tracking-widest text-green-300">ĐANG TẢI DỮ LIỆU...</h2>
-    <p id="loading-text" class="text-sm font-semibold text-green-100 opacity-70">Kết nối máy chủ Firebase</p>
+    <div class="text-6xl animate-bounce mb-4">🐷</div>
+    <h2 class="text-2xl font-black mb-2 tracking-widest text-green-300">ĐANG TẢI...</h2>
+    <p id="loading-text" class="text-sm font-semibold text-green-100 opacity-70">Khởi tạo đồ họa</p>
 </div>
 
 <div id="game-container" class="relative w-screen h-screen opacity-0 transition-opacity duration-1000">
@@ -172,14 +141,14 @@
         </div>
     </div>
 
-    <!-- UI: TOOL TRAY (Thay bằng hình ảnh) -->
+    <!-- UI: TOOL TRAY -->
     <div class="tool-tray glass-panel" id="tool-tray">
-        <div class="tool-item selected" data-tool="hand"><img src="" id="ui-hand" class="tool-icon"/></div>
-        <div class="tool-item" data-tool="scythe"><img src="" id="ui-scythe" class="tool-icon"/></div>
-        <div class="tool-item" data-tool="water"><img src="" id="ui-water" class="tool-icon"/><span class="tool-badge" id="b-water">0</span></div>
-        <div class="tool-item" data-tool="fertilizer"><img src="" id="ui-fert" class="tool-icon"/><span class="tool-badge" id="b-fert">0</span></div>
-        <div class="tool-item" data-tool="seed"><img src="" id="ui-seed" class="tool-icon"/><span class="tool-badge" id="b-seed">0</span></div>
-        <div class="tool-item" data-tool="hoe"><img src="" id="ui-hoe" class="tool-icon"/></div>
+        <div class="tool-item selected" data-tool="hand" title="Chọn">🖐️</div>
+        <div class="tool-item" data-tool="scythe" title="Thu hoạch">🪓</div>
+        <div class="tool-item" data-tool="water" title="Tưới nước">💧<span class="tool-badge" id="b-water">0</span></div>
+        <div class="tool-item" data-tool="fertilizer" title="Bón phân">💩<span class="tool-badge" id="b-fert">0</span></div>
+        <div class="tool-item" data-tool="seed" title="Gieo hạt">🌱<span class="tool-badge" id="b-seed">0</span></div>
+        <div class="tool-item" data-tool="hoe" title="Mở đất/Nâng cấp">🔨</div>
     </div>
 
     <!-- UI: NAVIGATION BAR -->
@@ -231,36 +200,69 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ================= LOAD ẢNH VÀO UI =================
-    // Hàm lấy ảnh từ DOM ẩn
-    const getImage = (id) => document.getElementById(id);
+    // ================= KHỞI TẠO ĐỒ HỌA (NHÚNG TRỰC TIẾP SVG CHUẨN) =================
+    // Sử dụng Data URI SVG để đảm bảo 100% không bao giờ lỗi hình ảnh
+    const ASSETS = {};
+    function loadSVGImage(svgString) {
+        const img = new Image();
+        img.src = "data:image/svg+xml;utf8," + encodeURIComponent(svgString);
+        return img;
+    }
 
-    // Gắn ảnh vào thanh công cụ
-    document.getElementById('ui-hand').src = getImage('icon-hand').src;
-    document.getElementById('ui-scythe').src = getImage('icon-scythe').src;
-    document.getElementById('ui-water').src = getImage('icon-water').src;
-    document.getElementById('ui-fert').src = getImage('icon-fertilizer').src;
-    document.getElementById('ui-seed').src = getImage('icon-seed').src;
-    document.getElementById('ui-hoe').src = getImage('icon-hoe').src;
+    // Khối đất Khóa
+    ASSETS.locked = loadSVGImage(`
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+            <polygon points='50,25 100,50 50,75 0,50' fill='#64748b'/>
+            <polygon points='0,50 50,75 50,85 0,60' fill='#475569'/>
+            <polygon points='50,75 100,50 100,60 50,85' fill='#334155'/>
+        </svg>`);
+    
+    // Khối đất Thường
+    ASSETS.soil1 = loadSVGImage(`
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+            <polygon points='50,25 100,50 50,75 0,50' fill='#8b5a2b'/>
+            <polygon points='0,50 50,75 50,85 0,60' fill='#6b4423'/>
+            <polygon points='50,75 100,50 100,60 50,85' fill='#50331a'/>
+        </svg>`);
 
+    // Khối đất VIP
+    ASSETS.soil2 = loadSVGImage(`
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+            <polygon points='50,25 100,50 50,75 0,50' fill='#a67b5b'/>
+            <polygon points='0,50 50,75 50,85 0,60' fill='#8a6244'/>
+            <polygon points='50,75 100,50 100,60 50,85' fill='#6f4f36'/>
+        </svg>`);
+
+    // Viền sáng khi hover
+    ASSETS.highlight = loadSVGImage(`
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+            <polygon points='50,25 100,50 50,75 0,50' fill='rgba(255,255,255,0.2)' stroke='white' stroke-width='3'/>
+        </svg>`);
+
+    // Hình ảnh Cây trồng (Mầm, Đang lớn, Chín)
+    ASSETS.cropSeed = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='40' text-anchor='middle'>🌱</text></svg>`);
+    ASSETS.cropGrow = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='50' text-anchor='middle'>🌿</text></svg>`);
+    ASSETS.cornReady = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='60' text-anchor='middle'>🌽</text></svg>`);
+    ASSETS.pumpkinReady = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='60' text-anchor='middle'>🎃</text></svg>`);
 
     // ================= DỮ LIỆU CỐ ĐỊNH =================
     const CROPS = {
         corn: { id: 'corn', name: 'Ngô', emoji: '🌽', time: 10, exp: 10, yield: 2, 
-                imgStages: [getImage('img-corn-1'), getImage('img-corn-2'), getImage('img-corn-3')] },
+                imgStages: [ASSETS.cropSeed, ASSETS.cropGrow, ASSETS.cornReady] },
         pumpkin: { id: 'pumpkin', name: 'Bí Ngô', emoji: '🎃', time: 20, exp: 25, yield: 1,
-                imgStages: [getImage('img-pumpkin-1'), getImage('img-pumpkin-2'), getImage('img-pumpkin-3')] }
+                imgStages: [ASSETS.cropSeed, ASSETS.cropGrow, ASSETS.pumpkinReady] }
     };
 
     const LAND_TIERS = [
-        { name: 'Khóa', cost: 500, img: getImage('img-soil-locked') },
-        { name: 'Đất Thường', speed: 1.0, cost: 0, img: getImage('img-soil-1') },
-        { name: 'Đất Tốt', speed: 1.5, cost: 2000, img: getImage('img-soil-2') }
+        { name: 'Khóa', cost: 500, img: ASSETS.locked },
+        { name: 'Đất Thường', speed: 1.0, cost: 0, img: ASSETS.soil1 },
+        { name: 'Đất Tốt', speed: 1.5, cost: 2000, img: ASSETS.soil2 }
     ];
 
     const gridSize = 8;
-    // Tỉ lệ hình ảnh Isometric (thường rộng gấp đôi cao)
-    const tileW = 120, tileH = 60;
+    // Kích thước chuẩn cho ngói Isometric 2:1
+    const tileW = 120;
+    const tileH = 60; 
 
     // ================= TRẠNG THÁI GAME =================
     let state = {
@@ -279,7 +281,6 @@
 
     let camera = { x: 0, y: 0 };
     let drag = { isDragging: false, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
-    // Ô đất đang được hover
     let hoveredTile = { i: -1, j: -1 }; 
 
     let currentUser = null;
@@ -288,17 +289,13 @@
     const canvas = document.getElementById('farmCanvas');
     const ctx = canvas.getContext('2d');
     const loadingScreen = document.getElementById('loading-screen');
-    const loadingText = document.getElementById('loading-text');
     const gameContainer = document.getElementById('game-container');
-    const imgGrass = getImage('img-grass');
-    const imgHighlight = getImage('img-highlight');
 
-    // ================= FIREBASE AUTH & FIRESTORE =================
+    // ================= FIREBASE LOGIC =================
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             document.getElementById('player-name').innerText = user.displayName || 'Nông Dân';
-            loadingText.innerText = "Đang tải dữ liệu đám mây...";
             await loadGameFromCloud();
             startGame();
         } else {
@@ -381,20 +378,17 @@
             if(showNotif) showFloat(window.innerWidth/2, 100, "Đã lưu lên Đám mây ☁️", "#22c55e");
         } catch(e) {
             console.error("Lỗi lưu Cloud:", e);
-            if(showNotif) showFloat(window.innerWidth/2, 100, "Lỗi mạng, chưa lưu được!", "#ef4444");
+            if(showNotif) showFloat(window.innerWidth/2, 100, "Lỗi mạng!", "#ef4444");
         }
     }
 
     document.getElementById('save-btn').addEventListener('click', () => {
-        const btn = document.getElementById('save-btn');
-        btn.innerHTML = `⏳`;
-        saveGameToCloud(true).then(() => { btn.innerHTML = '💾'; });
+        saveGameToCloud(true);
     });
 
     // ================= KHỞI ĐỘNG GAME =================
     function startGame() {
         resize();
-        // Camera canh giữa vùng Isometric
         camera.x = canvas.width / 2; 
         camera.y = canvas.height / 4;
 
@@ -439,7 +433,6 @@
     }
     
     function onDragMove(e) {
-        // Cập nhật tọa độ ô đang hover
         const rect = canvas.getBoundingClientRect();
         const sx = e.clientX - rect.left; const sy = e.clientY - rect.top;
         hoveredTile = screenToGrid(sx, sy);
@@ -452,7 +445,6 @@
 
         camera.x += dx; camera.y += dy;
 
-        // Giới hạn Camera (Rộng hơn chút để thoải mái lướt)
         const minX = -canvas.width; const maxX = canvas.width * 2;
         const minY = -canvas.height; const maxY = canvas.height * 1.5;
         camera.x = Math.max(minX, Math.min(maxX, camera.x));
@@ -562,7 +554,7 @@
         }
     }
 
-    // --- GAME LOOP & DRAW (Sử dụng Image 2D) ---
+    // --- GAME LOOP & RENDER CHÍNH XÁC ---
     function gameLoop() {
         const now = Date.now();
         state.plots.forEach(row => row.forEach(p => {
@@ -584,41 +576,33 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Vẽ toàn bộ bản đồ
         for (let i = 0; i < gridSize; i++) {
             for (let j = 0; j < gridSize; j++) {
                 const p = state.plots[i][j];
                 const pos = gridToScreen(i, j);
 
-                // Điểm bắt đầu vẽ ảnh (Trừ lùi nửa chiều rộng để canh giữa tọa độ X)
+                // Tọa độ vẽ ảnh (Vì SVG Box là 100x100, ta vẽ ra hình vuông tileW x tileW)
+                // Đỉnh của viên kim cương ở y = 25% chiều cao ảnh, nên ta phải offset Y để khớp với pos.y
                 const imgX = pos.x - tileW/2;
-                // Ảnh ngói Isometric thường có phần trong suốt ở trên, ta canh đỉnh Y 
-                const imgY = pos.y; 
+                const imgY = pos.y - (tileW * 0.25);
 
-                // 1. VẼ NỀN ĐẤT (TILES)
+                // 1. VẼ ĐẤT (TILES)
                 const tInfo = LAND_TIERS[p.tier];
-                
-                // Vẽ ảnh đất tương ứng
-                if (tInfo.img.complete) {
-                    ctx.drawImage(tInfo.img, imgX, imgY, tileW, tileW); // tileW vuông để giữ tỉ lệ 2:1 của hình thoi isometric
-                }
+                ctx.drawImage(tInfo.img, imgX, imgY, tileW, tileW);
 
                 // 2. HIGHLIGHT KHI HOVER
-                if(i === hoveredTile.i && j === hoveredTile.j && imgHighlight.complete) {
-                    ctx.drawImage(imgHighlight, imgX, imgY, tileW, tileW);
+                if(i === hoveredTile.i && j === hoveredTile.j) {
+                    ctx.drawImage(ASSETS.highlight, imgX, imgY, tileW, tileW);
                 }
 
-                // 3. HIỆU ỨNG TƯỚI/BÓN (Phủ màu nhẹ lên đất)
+                // 3. HIỆU ỨNG TƯỚI/BÓN
                 if(p.tier > 0 && (p.isFertilized || p.isWatered)) {
                     ctx.save();
-                    // Tạo Path hình thoi của mặt trên ô đất để Fill màu
                     ctx.beginPath();
-                    // Do ảnh có khoảng trống (padding), offset Y xuống 1/4 tileW
-                    const topY = pos.y + tileW/4; 
-                    ctx.moveTo(pos.x, topY); 
-                    ctx.lineTo(pos.x + tileW/2, topY + tileH/2);
-                    ctx.lineTo(pos.x, topY + tileH); 
-                    ctx.lineTo(pos.x - tileW/2, topY + tileH/2);
+                    ctx.moveTo(pos.x, pos.y); 
+                    ctx.lineTo(pos.x + tileW/2, pos.y + tileH/2);
+                    ctx.lineTo(pos.x, pos.y + tileH); 
+                    ctx.lineTo(pos.x - tileW/2, pos.y + tileH/2);
                     ctx.closePath();
                     
                     if(p.isFertilized) { ctx.fillStyle = 'rgba(234, 179, 8, 0.2)'; ctx.fill(); }
@@ -626,47 +610,34 @@
                     ctx.restore();
                 }
 
-                // 4. ICON KHÓA 
+                // 4. ICON Ổ KHÓA
                 if(p.tier === 0) {
                     ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.beginPath(); ctx.arc(pos.x, pos.y + tileW/2, 15, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = '#fff'; ctx.font = '16px Arial'; ctx.textAlign = 'center'; 
-                    ctx.fillText('🔒', pos.x, pos.y + tileW/2 + 5);
+                    ctx.beginPath(); ctx.arc(pos.x, pos.y + tileH/2, 14, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.font = '14px Arial'; ctx.textAlign = 'center'; 
+                    ctx.fillText('🔒', pos.x, pos.y + tileH/2 + 5);
                     ctx.font = 'bold 12px Lexend';
-                    ctx.fillText(tInfo.cost + ' 💰', pos.x, pos.y + tileW/2 + 25);
+                    ctx.fillText(tInfo.cost + ' 💰', pos.x, pos.y + tileH/2 + 25);
                 } 
-                // 5. VẼ CÂY TRỒNG (CROPS)
+                // 5. VẼ CÂY & TIẾN TRÌNH
                 else if(p.seedKey) {
                     const crop = CROPS[p.seedKey];
-                    let imgToDraw = null;
-                    
-                    // Quyết định dùng ảnh nào theo phần trăm lớn
+                    let imgToDraw = crop.imgStages[0];
                     if(p.status === 'ready') imgToDraw = crop.imgStages[2];
                     else if(p.progress > 50) imgToDraw = crop.imgStages[1];
-                    else imgToDraw = crop.imgStages[0];
 
-                    if(imgToDraw && imgToDraw.complete) {
-                        // Cây vẽ lùi lên trên một chút để "đứng" trên đất
-                        // Ảnh cây vuông, ta vẽ kích thước bằng ô đất (tileW)
-                        const cropSize = tileW * 0.8;
-                        const cX = pos.x - cropSize/2;
-                        // Y lùi lên trên (trừ đi cropSize) và cộng thêm bù trừ (offset)
-                        let cY = pos.y - cropSize/2 + tileW/4; 
+                    // Vẽ cây nằm gọn lên trên mặt đất
+                    let cY = imgY - 10; 
+                    if(p.status === 'ready') cY += Math.sin(Date.now()/200) * 3; // Nảy nảy
+                    ctx.drawImage(imgToDraw, imgX, cY, tileW, tileW);
 
-                        // Hiệu ứng nảy nhẹ khi chín
-                        if(p.status === 'ready') cY += Math.sin(Date.now()/200) * 3;
-
-                        ctx.drawImage(imgToDraw, cX, cY, cropSize, cropSize);
-                    }
-
-                    // 6. THANH TIẾN TRÌNH (Chỉ hiện khi đang trồng)
+                    // Thanh tiến trình
                     if(p.status === 'growing') {
                         const barW = 40;
-                        const barY = pos.y + 10;
+                        const barY = pos.y - 10;
                         ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(pos.x - barW/2, barY, barW, 5);
                         ctx.fillStyle = '#10b981'; ctx.fillRect(pos.x - barW/2, barY, barW * (p.progress/100), 5);
                         
-                        // Icon nhỏ nếu đã bón/tưới
                         if(p.isWatered) { ctx.font = '10px Arial'; ctx.fillText('💧', pos.x - 25, barY + 5); }
                         if(p.isFertilized) { ctx.font = '10px Arial'; ctx.fillText('💩', pos.x + 25, barY + 5); }
                     }
@@ -675,7 +646,7 @@
         }
     }
 
-    // --- TỌA ĐỘ TOÁN HỌC ISOMETRIC ---
+    // Tọa độ chuẩn xác 100%
     function gridToScreen(i, j) { 
         return { 
             x: camera.x + (i - j) * (tileW/2), 
@@ -684,17 +655,14 @@
     }
     
     function screenToGrid(sx, sy) {
-        // Điều chỉnh toán học một chút vì ảnh ngói (tile image) bắt đầu Y ở đỉnh thoi,
-        // nhưng thực tế phần hình thoi nằm thấp hơn đỉnh ảnh một đoạn = tileW/4
-        const adjustedSy = sy - (tileW/4); 
-        
-        const dx = sx - camera.x, dy = adjustedSy - camera.y;
+        const dx = sx - camera.x;
+        const dy = sy - camera.y;
         const i = (dy / (tileH/2) + dx / (tileW/2)) / 2;
         const j = (dy / (tileH/2) - dx / (tileW/2)) / 2;
         return { i: Math.floor(i), j: Math.floor(j) };
     }
 
-    // ================= UI UPDATE =================
+    // ================= UI CẬP NHẬT =================
     function updateUI() {
         document.getElementById('gold-val').innerText = state.gold.toLocaleString();
         document.getElementById('lvl-val').innerText = state.level;
