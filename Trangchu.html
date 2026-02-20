@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nông Trại VIP Pro - Trang Chủ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800;900&display=swap');
+        
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            font-family: 'Lexend', sans-serif;
+            background: linear-gradient(135deg, #2d6a4f, #1b4332); /* Nền xanh cỏ đậm */
+            user-select: none; -webkit-user-select: none; touch-action: none;
+        }
+
+        .isometric-canvas { display: block; touch-action: none; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .tool-tray {
+            position: absolute; bottom: 95px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; z-index: 100; pointer-events: auto;
+            padding: 8px; border-radius: 20px;
+        }
+        .tool-item {
+            width: 50px; height: 50px; border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; font-size: 22px;
+            background: white; border: 2px solid transparent; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden;
+        }
+        /* Icon hình ảnh trong Tool Tray */
+        .tool-icon { width: 36px; height: 36px; object-fit: contain; }
+        
+        .tool-item.selected { 
+            border-color: #f59e0b; transform: translateY(-8px) scale(1.1); 
+            background: #fffbeb; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); 
+        }
+        .tool-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #ef4444; color: white; font-size: 10px; font-weight: 900;
+            padding: 2px 6px; border-radius: 10px; border: 2px solid white; z-index: 2;
+        }
+
+        .float-info { 
+            position: absolute; pointer-events: none; font-weight: 900; 
+            font-size: 16px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            animation: floatUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; z-index: 200; 
+        }
+        @keyframes floatUp { 
+            0% { opacity: 0; transform: translateY(10px) scale(0.8); } 
+            20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); } 
+        }
+
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; height: 75px;
+            background: white; display: flex; justify-content: space-between;
+            align-items: center; z-index: 150;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
+            padding-bottom: env(safe-area-inset-bottom);
+            border-radius: 30px 30px 0 0;
+        }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: #9ca3af; transition: all 0.2s; padding-top: 5px;
+        }
+        .nav-item:active { transform: scale(0.9); }
+        
+        .nav-center-wrap { position: relative; flex: 1.2; display: flex; justify-content: center; }
+        .nav-center-btn {
+            position: absolute; top: -35px; width: 70px; height: 70px;
+            background: linear-gradient(135deg, #22c55e, #15803d);
+            border: 6px solid #f0fdf4; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4); transition: transform 0.2s;
+        }
+        .nav-center-btn:active { transform: scale(0.9); }
+        
+        .exp-bar-bg { width: 100%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; margin-top: 2px;}
+        .exp-bar-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
+
+        /* Loader */
+        #loading-screen {
+            position: fixed; inset: 0; background: #1b4332; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+            transition: opacity 0.5s;
+        }
+        .asset-preload { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- Preload Hình Ảnh (Để tránh giật lag khi vẽ) -->
+<div class="asset-preload">
+    <!-- Tiles Môi trường -->
+    <img id="img-grass" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/grass_tile.png" alt="Cỏ" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iIzQzYTA0NyIvPjwvc3ZnPg=='" />
+    <img id="img-soil-1" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/soil_tile.png" alt="Đất thường" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iIzhiNWEyYiIvPjwvc3ZnPg=='"/>
+    <img id="img-soil-2" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/soil_rich_tile.png" alt="Đất tốt" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iI2E2N2I1YiIvPjwvc3ZnPg=='"/>
+    <img id="img-soil-locked" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/stone_tile.png" alt="Đất khóa" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0iIzRhNTU2OCIvPjwvc3ZnPg=='"/>
+    <img id="img-highlight" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/isometric/highlight.png" alt="Highlight" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgNTAiPjxwb2x5Z29uIHBvaW50cz0iNTAsMCAxMDAsMjUgNTAsNTAgMCwyNSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4='"/>
+    
+    <!-- Các Giai Đoạn Của Ngô (Corn) -->
+    <img id="img-corn-1" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/seedling.png" alt="Mầm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4yxPC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="img-corn-2" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/corn_growing.png" alt="Ngô non" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4y/PC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="img-corn-3" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/corn_ready.png" alt="Ngô chín" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn309PC90ZXh0Pjwvc3ZnPg=='"/>
+
+    <!-- Các Giai Đoạn Của Bí Ngô (Pumpkin) -->
+    <img id="img-pumpkin-1" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/seedling.png" alt="Mầm" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4yxPC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="img-pumpkin-2" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/pumpkin_growing.png" alt="Bí non" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn4y/PC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="img-pumpkin-3" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/crops/pumpkin_ready.png" alt="Bí chín" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTUiIHk9IjQwIiBmb250LXNpemU9IjMwIj7wn46DPC90ZXh0Pjwvc3ZnPg=='"/>
+
+    <!-- Tools -->
+    <img id="icon-hand" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/cursor.png" alt="Hand" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wnZWePC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="icon-scythe" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/scythe.png" alt="Scythe" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wn6eaPC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="icon-water" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/watering_can.png" alt="Water" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wnZKnPC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="icon-fertilizer" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/fertilizer.png" alt="Fertilizer" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wnZSpPC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="icon-seed" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/seed_bag.png" alt="Seed" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wn4yxPC90ZXh0Pjwvc3ZnPg=='"/>
+    <img id="icon-hoe" src="https://raw.githubusercontent.com/LiarOnce/farm-assets/main/icons/hoe.png" alt="Hoe" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MCA1MCI+PHRleHQgeD0iMTAiIHk9IjQwIiBmb250LXNpemU9IjQwIj7wn5SoPC90ZXh0Pjwvc3ZnPg=='"/>
+</div>
+
+<!-- Màn hình tải -->
+<div id="loading-screen">
+    <div class="text-6xl animate-bounce mb-4" id="loading-icon">🐷</div>
+    <h2 class="text-2xl font-black mb-2 tracking-widest text-green-300">ĐANG TẢI DỮ LIỆU...</h2>
+    <p id="loading-text" class="text-sm font-semibold text-green-100 opacity-70">Kết nối máy chủ Firebase</p>
+</div>
+
+<div id="game-container" class="relative w-screen h-screen opacity-0 transition-opacity duration-1000">
+    <canvas id="farmCanvas" class="isometric-canvas"></canvas>
+
+    <!-- UI: TOP BAR -->
+    <div class="absolute top-4 left-0 w-full px-4 flex justify-between items-start z-50 pointer-events-none">
+        
+        <div class="flex flex-col gap-2">
+            <div class="glass-panel px-4 py-2.5 rounded-2xl flex flex-col shadow-lg pointer-events-auto min-w-[140px]">
+                <div class="flex justify-between items-center w-full">
+                    <span class="text-xs font-bold text-stone-500 uppercase">Cấp độ <span id="lvl-val" class="text-blue-600 font-black text-sm">1</span></span>
+                    <span id="exp-val" class="text-[10px] text-stone-400 font-bold">0/100</span>
+                </div>
+                <div class="exp-bar-bg"><div id="exp-bar" class="exp-bar-fill" style="width: 0%;"></div></div>
+            </div>
+
+            <a href="tk.html" class="glass-panel px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg pointer-events-auto no-underline active:scale-95 transition-transform">
+                <span class="text-xl">💰</span>
+                <span id="gold-val" class="font-black text-orange-600 text-lg">---</span>
+                <div class="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center ml-auto">
+                    <span class="text-[10px] text-orange-600 font-black">+</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="flex flex-col items-end gap-2">
+            <div class="glass-panel px-3 py-2 rounded-xl flex items-center gap-2 shadow-lg pointer-events-auto">
+                <span class="text-xl">☀️</span>
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-bold text-stone-400 uppercase leading-tight">Nông dân</span>
+                    <span id="player-name" class="text-xs font-black text-green-700 leading-tight">Khách</span>
+                </div>
+            </div>
+            
+            <button id="save-btn" class="glass-panel w-10 h-10 rounded-xl flex items-center justify-center shadow-lg pointer-events-auto active:scale-95 transition-transform text-lg">
+                💾
+            </button>
+        </div>
+    </div>
+
+    <!-- UI: TOOL TRAY (Thay bằng hình ảnh) -->
+    <div class="tool-tray glass-panel" id="tool-tray">
+        <div class="tool-item selected" data-tool="hand"><img src="" id="ui-hand" class="tool-icon"/></div>
+        <div class="tool-item" data-tool="scythe"><img src="" id="ui-scythe" class="tool-icon"/></div>
+        <div class="tool-item" data-tool="water"><img src="" id="ui-water" class="tool-icon"/><span class="tool-badge" id="b-water">0</span></div>
+        <div class="tool-item" data-tool="fertilizer"><img src="" id="ui-fert" class="tool-icon"/><span class="tool-badge" id="b-fert">0</span></div>
+        <div class="tool-item" data-tool="seed"><img src="" id="ui-seed" class="tool-icon"/><span class="tool-badge" id="b-seed">0</span></div>
+        <div class="tool-item" data-tool="hoe"><img src="" id="ui-hoe" class="tool-icon"/></div>
+    </div>
+
+    <!-- UI: NAVIGATION BAR -->
+    <div class="nav-bar">
+        <a href="shop.html" class="nav-item">
+            <span class="text-2xl mb-1 grayscale opacity-70">🛍️</span>
+            <span class="text-[9px] font-black uppercase tracking-wide">Cửa hàng</span>
+        </a>
+        <a href="kho.html" class="nav-item">
+            <span class="text-2xl mb-1 grayscale opacity-70">📦</span>
+            <span class="text-[9px] font-black uppercase tracking-wide">Kho</span>
+        </a>
+        
+        <a href="trangchu.html" class="nav-center-wrap text-green-700">
+            <div class="nav-center-btn">
+                <span class="text-3xl">🏠</span>
+            </div>
+            <span class="text-[10px] font-black uppercase mt-12 tracking-wider">Trang trại</span>
+        </a>
+        
+        <a href="gt.html" class="nav-item">
+            <span class="text-2xl mb-1 grayscale opacity-70">🎮</span>
+            <span class="text-[9px] font-black uppercase tracking-wide">Giải trí</span>
+        </a>
+        <a href="tk.html" class="nav-item">
+            <span class="text-2xl mb-1 grayscale opacity-70">👤</span>
+            <span class="text-[9px] font-black uppercase tracking-wide">Tài khoản</span>
+        </a>
+    </div>
+</div>
+
+<script type="module">
+    // ================= FIREBASE CONFIG =================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAQa6awFxFTOrRXPnda8rS6vlKLKPDMJT0",
+      authDomain: "nongtraiheocon.firebaseapp.com",
+      projectId: "nongtraiheocon",
+      storageBucket: "nongtraiheocon.firebasestorage.app",
+      messagingSenderId: "964519162656",
+      appId: "1:964519162656:web:27247ed6287dfc74ef5d45",
+      measurementId: "G-RT8HPTJERF"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ================= LOAD ẢNH VÀO UI =================
+    // Hàm lấy ảnh từ DOM ẩn
+    const getImage = (id) => document.getElementById(id);
+
+    // Gắn ảnh vào thanh công cụ
+    document.getElementById('ui-hand').src = getImage('icon-hand').src;
+    document.getElementById('ui-scythe').src = getImage('icon-scythe').src;
+    document.getElementById('ui-water').src = getImage('icon-water').src;
+    document.getElementById('ui-fert').src = getImage('icon-fertilizer').src;
+    document.getElementById('ui-seed').src = getImage('icon-seed').src;
+    document.getElementById('ui-hoe').src = getImage('icon-hoe').src;
+
+
+    // ================= DỮ LIỆU CỐ ĐỊNH =================
+    const CROPS = {
+        corn: { id: 'corn', name: 'Ngô', emoji: '🌽', time: 10, exp: 10, yield: 2, 
+                imgStages: [getImage('img-corn-1'), getImage('img-corn-2'), getImage('img-corn-3')] },
+        pumpkin: { id: 'pumpkin', name: 'Bí Ngô', emoji: '🎃', time: 20, exp: 25, yield: 1,
+                imgStages: [getImage('img-pumpkin-1'), getImage('img-pumpkin-2'), getImage('img-pumpkin-3')] }
+    };
+
+    const LAND_TIERS = [
+        { name: 'Khóa', cost: 500, img: getImage('img-soil-locked') },
+        { name: 'Đất Thường', speed: 1.0, cost: 0, img: getImage('img-soil-1') },
+        { name: 'Đất Tốt', speed: 1.5, cost: 2000, img: getImage('img-soil-2') }
+    ];
+
+    const gridSize = 8;
+    // Tỉ lệ hình ảnh Isometric (thường rộng gấp đôi cao)
+    const tileW = 120, tileH = 60;
+
+    // ================= TRẠNG THÁI GAME =================
+    let state = {
+        gold: 1000,
+        level: 1,
+        exp: 0,
+        currentTool: 'hand',
+        selectedSeed: 'corn',
+        inventory: {
+            seeds: { corn: 10, pumpkin: 5 },
+            crops: { corn: 0, pumpkin: 0 },
+            tools: { water: 15, fertilizer: 5 }
+        },
+        plots: []
+    };
+
+    let camera = { x: 0, y: 0 };
+    let drag = { isDragging: false, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
+    // Ô đất đang được hover
+    let hoveredTile = { i: -1, j: -1 }; 
+
+    let currentUser = null;
+    let gameLoopId;
+
+    const canvas = document.getElementById('farmCanvas');
+    const ctx = canvas.getContext('2d');
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingText = document.getElementById('loading-text');
+    const gameContainer = document.getElementById('game-container');
+    const imgGrass = getImage('img-grass');
+    const imgHighlight = getImage('img-highlight');
+
+    // ================= FIREBASE AUTH & FIRESTORE =================
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('player-name').innerText = user.displayName || 'Nông Dân';
+            loadingText.innerText = "Đang tải dữ liệu đám mây...";
+            await loadGameFromCloud();
+            startGame();
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+
+    function createEmptyFarm() {
+        let arr = [];
+        for(let i=0; i<gridSize; i++) {
+            arr[i] = [];
+            for(let j=0; j<gridSize; j++) {
+                let isUnlocked = (i < 2 && j < 2);
+                arr[i][j] = {
+                    tier: isUnlocked ? 1 : 0,
+                    seedKey: null,
+                    progress: 0,
+                    isWatered: false,
+                    isFertilized: false,
+                    status: 'empty', 
+                    lastTick: Date.now()
+                };
+            }
+        }
+        return arr;
+    }
+
+    async function loadGameFromCloud() {
+        try {
+            const docRef = doc(db, "users", currentUser.uid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                state.gold = data.gold || 1000;
+                state.level = data.level || 1;
+                state.exp = data.exp || 0;
+                state.inventory = { ...state.inventory, ...data.inventory };
+                
+                let savedPlots = data.plots;
+                let now = Date.now();
+                if(savedPlots && savedPlots.length > 0) {
+                    state.plots = savedPlots.map(row => row.map(p => {
+                        if(p.status === 'growing') {
+                            let offlineSeconds = (now - p.lastTick) / 1000;
+                            if(offlineSeconds < 0) offlineSeconds = 0; 
+                            const crop = CROPS[p.seedKey];
+                            if(crop) {
+                                let multi = LAND_TIERS[p.tier].speed;
+                                if(p.isWatered) multi *= 1.5;
+                                if(p.isFertilized) multi *= 2.0;
+                                p.progress += (100 / crop.time) * multi * offlineSeconds;
+                                if(p.progress >= 100) { p.progress = 100; p.status = 'ready'; }
+                            }
+                        }
+                        p.lastTick = now;
+                        return p;
+                    }));
+                } else {
+                    state.plots = createEmptyFarm();
+                }
+            } else {
+                state.plots = createEmptyFarm();
+                await saveGameToCloud(false); 
+            }
+        } catch (e) {
+            console.error("Lỗi tải dữ liệu Cloud:", e);
+            state.plots = createEmptyFarm(); 
+        }
+    }
+
+    async function saveGameToCloud(showNotif = false) {
+        if(!currentUser) return;
+        state.plots.forEach(row => row.forEach(p => p.lastTick = Date.now()));
+        try {
+            await setDoc(doc(db, "users", currentUser.uid), {
+                gold: state.gold, level: state.level, exp: state.exp,
+                inventory: state.inventory, plots: state.plots, lastSaved: new Date()
+            }, { merge: true });
+            if(showNotif) showFloat(window.innerWidth/2, 100, "Đã lưu lên Đám mây ☁️", "#22c55e");
+        } catch(e) {
+            console.error("Lỗi lưu Cloud:", e);
+            if(showNotif) showFloat(window.innerWidth/2, 100, "Lỗi mạng, chưa lưu được!", "#ef4444");
+        }
+    }
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+        const btn = document.getElementById('save-btn');
+        btn.innerHTML = `⏳`;
+        saveGameToCloud(true).then(() => { btn.innerHTML = '💾'; });
+    });
+
+    // ================= KHỞI ĐỘNG GAME =================
+    function startGame() {
+        resize();
+        // Camera canh giữa vùng Isometric
+        camera.x = canvas.width / 2; 
+        camera.y = canvas.height / 4;
+
+        setupListeners();
+        updateUI();
+
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            gameContainer.style.opacity = '1';
+        }, 500);
+
+        gameLoopId = requestAnimationFrame(gameLoop);
+        setInterval(() => saveGameToCloud(false), 30000);
+    }
+
+    function setupListeners() {
+        window.addEventListener('resize', resize);
+        
+        document.querySelectorAll('.tool-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.tool-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                state.currentTool = item.dataset.tool;
+            });
+        });
+
+        canvas.addEventListener('mousedown', onDragStart);
+        window.addEventListener('mousemove', onDragMove);
+        window.addEventListener('mouseup', onDragEnd);
+
+        canvas.addEventListener('touchstart', (e) => onDragStart(e.touches[0]), {passive: false});
+        window.addEventListener('touchmove', (e) => { e.preventDefault(); onDragMove(e.touches[0]); }, {passive: false});
+        window.addEventListener('touchend', onDragEnd);
+    }
+
+    // --- PAN CAMERA & HOVER ---
+    function onDragStart(e) {
+        drag.isDragging = true; drag.moved = false;
+        drag.startX = e.clientX; drag.startY = e.clientY;
+        drag.lastX = e.clientX; drag.lastY = e.clientY;
+    }
+    
+    function onDragMove(e) {
+        // Cập nhật tọa độ ô đang hover
+        const rect = canvas.getBoundingClientRect();
+        const sx = e.clientX - rect.left; const sy = e.clientY - rect.top;
+        hoveredTile = screenToGrid(sx, sy);
+
+        if(!drag.isDragging) return;
+        const dx = e.clientX - drag.lastX;
+        const dy = e.clientY - drag.lastY;
+        
+        if(Math.abs(e.clientX - drag.startX) > 5 || Math.abs(e.clientY - drag.startY) > 5) drag.moved = true;
+
+        camera.x += dx; camera.y += dy;
+
+        // Giới hạn Camera (Rộng hơn chút để thoải mái lướt)
+        const minX = -canvas.width; const maxX = canvas.width * 2;
+        const minY = -canvas.height; const maxY = canvas.height * 1.5;
+        camera.x = Math.max(minX, Math.min(maxX, camera.x));
+        camera.y = Math.max(minY, Math.min(maxY, camera.y));
+
+        drag.lastX = e.clientX; drag.lastY = e.clientY;
+    }
+    
+    function onDragEnd(e) {
+        drag.isDragging = false;
+        if(!drag.moved) handleAction(drag.startX, drag.startY);
+    }
+
+    // --- TƯƠNG TÁC ĐẤT ---
+    function handleAction(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const sx = clientX - rect.left; const sy = clientY - rect.top;
+        const grid = screenToGrid(sx, sy);
+        if(grid.i >= 0 && grid.i < gridSize && grid.j >= 0 && grid.j < gridSize) {
+            applyTool(grid.i, grid.j, sx, sy);
+        }
+    }
+
+    function applyTool(i, j, sx, sy) {
+        const p = state.plots[i][j];
+
+        if(p.tier === 0) {
+            if (state.currentTool === 'hoe' || state.currentTool === 'hand') {
+                if(state.gold >= LAND_TIERS[0].cost) {
+                    state.gold -= LAND_TIERS[0].cost;
+                    p.tier = 1;
+                    showFloat(sx, sy, "🔓 Mở khóa đất", "#f59e0b");
+                    updateUI();
+                } else showFloat(sx, sy, "Thiếu vàng!", "#ef4444");
+            }
+            return;
+        }
+
+        switch(state.currentTool) {
+            case 'hand':
+            case 'scythe':
+                if(p.status === 'ready') harvest(i, j, sx, sy);
+                else if(p.status === 'growing') showFloat(sx, sy, "⏳ Chưa chín!", "#9ca3af");
+                break;
+            case 'water':
+                if(p.status === 'growing' && !p.isWatered) {
+                    if(state.inventory.tools.water > 0) {
+                        p.isWatered = true; state.inventory.tools.water--;
+                        showFloat(sx, sy, "💧 Đã tưới", "#3b82f6");
+                        updateUI();
+                    } else showFloat(sx, sy, "Hết nước!", "#ef4444");
+                }
+                break;
+            case 'fertilizer':
+                if(p.status === 'growing' && !p.isFertilized) {
+                    if(state.inventory.tools.fertilizer > 0) {
+                        p.isFertilized = true; state.inventory.tools.fertilizer--;
+                        showFloat(sx, sy, "💩 Đã bón", "#22c55e");
+                        updateUI();
+                    } else showFloat(sx, sy, "Hết phân bón!", "#ef4444");
+                }
+                break;
+            case 'seed':
+                if(p.status === 'empty') {
+                    if(state.inventory.seeds[state.selectedSeed] > 0) {
+                        p.seedKey = state.selectedSeed;
+                        p.status = 'growing';
+                        p.progress = 0;
+                        p.startTime = Date.now();
+                        state.inventory.seeds[state.selectedSeed]--;
+                        showFloat(sx, sy, "🌱 Gieo hạt", "#10b981");
+                        updateUI();
+                    } else showFloat(sx, sy, "Hết hạt giống!", "#ef4444");
+                }
+                break;
+            case 'hoe':
+                if(p.status === 'empty' && p.tier === 1 && state.gold >= LAND_TIERS[2].cost) {
+                    state.gold -= LAND_TIERS[2].cost;
+                    p.tier = 2;
+                    showFloat(sx, sy, "⭐ Nâng cấp!", "#f59e0b");
+                    updateUI();
+                }
+                break;
+        }
+    }
+
+    function harvest(i, j, sx, sy) {
+        const p = state.plots[i][j];
+        const crop = CROPS[p.seedKey];
+        state.inventory.crops[p.seedKey] += crop.yield;
+        state.gold += crop.yield * 10; 
+        addExp(crop.exp, sx, sy);
+        p.status = 'empty'; p.seedKey = null; p.isWatered = false; p.isFertilized = false; p.progress = 0;
+        showFloat(sx, sy-20, `+${crop.yield} ${crop.emoji}`, "#f59e0b");
+        showFloat(sx, sy, `+${crop.yield * 10} 💰`, "#facc15");
+        updateUI();
+    }
+
+    function addExp(amount, sx, sy) {
+        state.exp += amount;
+        let maxExp = state.level * 100;
+        if(state.exp >= maxExp) {
+            state.exp -= maxExp;
+            state.level++;
+            showFloat(sx, sy-40, `🎉 Lên Cấp ${state.level}!`, "#3b82f6");
+            state.gold += 500;
+        }
+    }
+
+    // --- GAME LOOP & DRAW (Sử dụng Image 2D) ---
+    function gameLoop() {
+        const now = Date.now();
+        state.plots.forEach(row => row.forEach(p => {
+            if(p.status === 'growing') {
+                const crop = CROPS[p.seedKey];
+                const dt = (now - p.lastTick) / 1000;
+                let multi = LAND_TIERS[p.tier].speed;
+                if(p.isWatered) multi *= 1.5;
+                if(p.isFertilized) multi *= 2.0;
+                p.progress += (100 / crop.time) * multi * dt;
+                if(p.progress >= 100) { p.progress = 100; p.status = 'ready'; }
+            }
+            p.lastTick = now;
+        }));
+        draw();
+        gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Vẽ toàn bộ bản đồ
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                const p = state.plots[i][j];
+                const pos = gridToScreen(i, j);
+
+                // Điểm bắt đầu vẽ ảnh (Trừ lùi nửa chiều rộng để canh giữa tọa độ X)
+                const imgX = pos.x - tileW/2;
+                // Ảnh ngói Isometric thường có phần trong suốt ở trên, ta canh đỉnh Y 
+                const imgY = pos.y; 
+
+                // 1. VẼ NỀN ĐẤT (TILES)
+                const tInfo = LAND_TIERS[p.tier];
+                
+                // Vẽ ảnh đất tương ứng
+                if (tInfo.img.complete) {
+                    ctx.drawImage(tInfo.img, imgX, imgY, tileW, tileW); // tileW vuông để giữ tỉ lệ 2:1 của hình thoi isometric
+                }
+
+                // 2. HIGHLIGHT KHI HOVER
+                if(i === hoveredTile.i && j === hoveredTile.j && imgHighlight.complete) {
+                    ctx.drawImage(imgHighlight, imgX, imgY, tileW, tileW);
+                }
+
+                // 3. HIỆU ỨNG TƯỚI/BÓN (Phủ màu nhẹ lên đất)
+                if(p.tier > 0 && (p.isFertilized || p.isWatered)) {
+                    ctx.save();
+                    // Tạo Path hình thoi của mặt trên ô đất để Fill màu
+                    ctx.beginPath();
+                    // Do ảnh có khoảng trống (padding), offset Y xuống 1/4 tileW
+                    const topY = pos.y + tileW/4; 
+                    ctx.moveTo(pos.x, topY); 
+                    ctx.lineTo(pos.x + tileW/2, topY + tileH/2);
+                    ctx.lineTo(pos.x, topY + tileH); 
+                    ctx.lineTo(pos.x - tileW/2, topY + tileH/2);
+                    ctx.closePath();
+                    
+                    if(p.isFertilized) { ctx.fillStyle = 'rgba(234, 179, 8, 0.2)'; ctx.fill(); }
+                    if(p.isWatered) { ctx.fillStyle = 'rgba(59, 130, 246, 0.2)'; ctx.fill(); }
+                    ctx.restore();
+                }
+
+                // 4. ICON KHÓA 
+                if(p.tier === 0) {
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.beginPath(); ctx.arc(pos.x, pos.y + tileW/2, 15, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = '#fff'; ctx.font = '16px Arial'; ctx.textAlign = 'center'; 
+                    ctx.fillText('🔒', pos.x, pos.y + tileW/2 + 5);
+                    ctx.font = 'bold 12px Lexend';
+                    ctx.fillText(tInfo.cost + ' 💰', pos.x, pos.y + tileW/2 + 25);
+                } 
+                // 5. VẼ CÂY TRỒNG (CROPS)
+                else if(p.seedKey) {
+                    const crop = CROPS[p.seedKey];
+                    let imgToDraw = null;
+                    
+                    // Quyết định dùng ảnh nào theo phần trăm lớn
+                    if(p.status === 'ready') imgToDraw = crop.imgStages[2];
+                    else if(p.progress > 50) imgToDraw = crop.imgStages[1];
+                    else imgToDraw = crop.imgStages[0];
+
+                    if(imgToDraw && imgToDraw.complete) {
+                        // Cây vẽ lùi lên trên một chút để "đứng" trên đất
+                        // Ảnh cây vuông, ta vẽ kích thước bằng ô đất (tileW)
+                        const cropSize = tileW * 0.8;
+                        const cX = pos.x - cropSize/2;
+                        // Y lùi lên trên (trừ đi cropSize) và cộng thêm bù trừ (offset)
+                        let cY = pos.y - cropSize/2 + tileW/4; 
+
+                        // Hiệu ứng nảy nhẹ khi chín
+                        if(p.status === 'ready') cY += Math.sin(Date.now()/200) * 3;
+
+                        ctx.drawImage(imgToDraw, cX, cY, cropSize, cropSize);
+                    }
+
+                    // 6. THANH TIẾN TRÌNH (Chỉ hiện khi đang trồng)
+                    if(p.status === 'growing') {
+                        const barW = 40;
+                        const barY = pos.y + 10;
+                        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(pos.x - barW/2, barY, barW, 5);
+                        ctx.fillStyle = '#10b981'; ctx.fillRect(pos.x - barW/2, barY, barW * (p.progress/100), 5);
+                        
+                        // Icon nhỏ nếu đã bón/tưới
+                        if(p.isWatered) { ctx.font = '10px Arial'; ctx.fillText('💧', pos.x - 25, barY + 5); }
+                        if(p.isFertilized) { ctx.font = '10px Arial'; ctx.fillText('💩', pos.x + 25, barY + 5); }
+                    }
+                }
+            }
+        }
+    }
+
+    // --- TỌA ĐỘ TOÁN HỌC ISOMETRIC ---
+    function gridToScreen(i, j) { 
+        return { 
+            x: camera.x + (i - j) * (tileW/2), 
+            y: camera.y + (i + j) * (tileH/2) 
+        }; 
+    }
+    
+    function screenToGrid(sx, sy) {
+        // Điều chỉnh toán học một chút vì ảnh ngói (tile image) bắt đầu Y ở đỉnh thoi,
+        // nhưng thực tế phần hình thoi nằm thấp hơn đỉnh ảnh một đoạn = tileW/4
+        const adjustedSy = sy - (tileW/4); 
+        
+        const dx = sx - camera.x, dy = adjustedSy - camera.y;
+        const i = (dy / (tileH/2) + dx / (tileW/2)) / 2;
+        const j = (dy / (tileH/2) - dx / (tileW/2)) / 2;
+        return { i: Math.floor(i), j: Math.floor(j) };
+    }
+
+    // ================= UI UPDATE =================
+    function updateUI() {
+        document.getElementById('gold-val').innerText = state.gold.toLocaleString();
+        document.getElementById('lvl-val').innerText = state.level;
+        let maxExp = state.level * 100;
+        document.getElementById('exp-val').innerText = `${Math.floor(state.exp)}/${maxExp}`;
+        document.getElementById('exp-bar').style.width = `${(state.exp / maxExp) * 100}%`;
+
+        document.getElementById('b-water').innerText = state.inventory.tools.water;
+        document.getElementById('b-fert').innerText = state.inventory.tools.fertilizer;
+        document.getElementById('b-seed').innerText = state.inventory.seeds[state.selectedSeed] || 0;
+    }
+
+    function showFloat(x, y, txt, color) {
+        const div = document.createElement('div');
+        div.className = 'float-info'; div.innerText = txt;
+        div.style.left = x + 'px'; div.style.top = y + 'px'; div.style.color = color;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 1200);
+    }
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+</script>
+
+</body>
+</html>
+
+
