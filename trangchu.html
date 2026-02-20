@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nông Trại VIP Pro - Trang Chủ</title>
+    <title>Nông Trại VIP Pro - Đầu Tư</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800;900&display=swap');
@@ -11,60 +11,70 @@
         body {
             margin: 0; padding: 0; overflow: hidden;
             font-family: 'Lexend', sans-serif;
-            background: #113624; /* Xanh lá thẫm làm nền */
-            user-select: none; -webkit-user-select: none; touch-action: none;
+            background: #f3f4f6; /* Nền sáng sủa sạch sẽ cho app đầu tư */
+            user-select: none; -webkit-user-select: none; touch-action: manipulation;
         }
 
-        .isometric-canvas { display: block; touch-action: none; }
+        /* Nền cong màu xanh ở trên cùng */
+        .bg-header {
+            position: absolute; top: 0; left: 0; width: 100%; height: 220px;
+            background: linear-gradient(135deg, #16a34a, #14532d);
+            border-radius: 0 0 40px 40px; z-index: 0;
+            box-shadow: 0 10px 30px rgba(22, 163, 74, 0.2);
+        }
 
         .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         }
 
-        .tool-tray {
-            position: absolute; bottom: 95px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; z-index: 100; pointer-events: auto;
-            padding: 8px; border-radius: 20px;
+        /* Khung cuộn mượt mà */
+        .scroll-area {
+            position: absolute; top: 180px; bottom: 85px; left: 0; width: 100%;
+            overflow-y: auto; padding: 0 16px; z-index: 10;
         }
-        .tool-item {
-            width: 50px; height: 50px; border-radius: 14px; 
-            display: flex; align-items: center; justify-content: center; font-size: 24px;
-            background: white; border: 2px solid transparent; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; overflow: visible;
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Hiệu ứng thẻ đầu tư */
+        .invest-card {
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+        .invest-card:active { transform: scale(0.98); }
+
+        /* Progress Bar */
+        .progress-bg { width: 100%; background: #e5e7eb; border-radius: 999px; height: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 999px; transition: width 1s linear; }
         
-        .tool-item.selected { 
-            border-color: #f59e0b; transform: translateY(-8px) scale(1.1); 
-            background: #fffbeb; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); 
-        }
-        .tool-badge {
-            position: absolute; top: -5px; right: -5px;
-            background: #ef4444; color: white; font-size: 10px; font-weight: 900;
-            padding: 2px 6px; border-radius: 10px; border: 2px solid white; z-index: 2;
+        .ready-pulse { animation: pulseReady 1.5s infinite; }
+        @keyframes pulseReady {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
         }
 
+        /* Floating Text */
         .float-info { 
             position: absolute; pointer-events: none; font-weight: 900; 
-            font-size: 16px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            font-size: 18px; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
             animation: floatUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; z-index: 200; 
         }
         @keyframes floatUp { 
-            0% { opacity: 0; transform: translateY(10px) scale(0.8); } 
-            20% { opacity: 1; transform: translateY(-10px) scale(1.1); }
+            0% { opacity: 0; transform: translateY(0) scale(0.8); } 
+            20% { opacity: 1; transform: translateY(-20px) scale(1.2); }
             100% { opacity: 0; transform: translateY(-80px) scale(1); } 
         }
 
+        /* Nav Bar Cố Định */
         .nav-bar {
             position: fixed; bottom: 0; width: 100%; height: 75px;
             background: white; display: flex; justify-content: space-between;
             align-items: center; z-index: 150;
-            box-shadow: 0 -5px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.05);
             padding-bottom: env(safe-area-inset-bottom);
-            border-radius: 30px 30px 0 0;
+            border-radius: 24px 24px 0 0;
         }
         .nav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -74,20 +84,17 @@
         
         .nav-center-wrap { position: relative; flex: 1.2; display: flex; justify-content: center; }
         .nav-center-btn {
-            position: absolute; top: -35px; width: 70px; height: 70px;
+            position: absolute; top: -30px; width: 65px; height: 65px;
             background: linear-gradient(135deg, #22c55e, #15803d);
-            border: 6px solid #f0fdf4; border-radius: 50%;
+            border: 5px solid #f3f4f6; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4); transition: transform 0.2s;
+            box-shadow: 0 8px 20px rgba(22, 163, 74, 0.3); transition: transform 0.2s;
         }
         .nav-center-btn:active { transform: scale(0.9); }
-        
-        .exp-bar-bg { width: 100%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 10px; overflow: hidden; margin-top: 2px;}
-        .exp-bar-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
 
         /* Loader */
         #loading-screen {
-            position: fixed; inset: 0; background: #113624; z-index: 9999;
+            position: fixed; inset: 0; background: #14532d; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
             transition: opacity 0.5s;
         }
@@ -95,60 +102,52 @@
 </head>
 <body>
 
-<!-- Màn hình tải -->
 <div id="loading-screen">
-    <div class="text-6xl animate-bounce mb-4">🐷</div>
+    <div class="text-6xl animate-bounce mb-4">🚜</div>
     <h2 class="text-2xl font-black mb-2 tracking-widest text-green-300">ĐANG TẢI...</h2>
-    <p id="loading-text" class="text-sm font-semibold text-green-100 opacity-70">Khởi tạo đồ họa</p>
+    <p id="loading-text" class="text-sm font-semibold text-green-100 opacity-70">Khởi tạo dữ liệu đầu tư</p>
 </div>
 
 <div id="game-container" class="relative w-screen h-screen opacity-0 transition-opacity duration-1000">
-    <canvas id="farmCanvas" class="isometric-canvas"></canvas>
+    
+    <!-- Background Header -->
+    <div class="bg-header"></div>
 
-    <!-- UI: TOP BAR -->
-    <div class="absolute top-4 left-0 w-full px-4 flex justify-between items-start z-50 pointer-events-none">
-        
-        <div class="flex flex-col gap-2">
-            <div class="glass-panel px-4 py-2.5 rounded-2xl flex flex-col shadow-lg pointer-events-auto min-w-[140px]">
-                <div class="flex justify-between items-center w-full">
-                    <span class="text-xs font-bold text-stone-500 uppercase">Cấp độ <span id="lvl-val" class="text-blue-600 font-black text-sm">1</span></span>
-                    <span id="exp-val" class="text-[10px] text-stone-400 font-bold">0/100</span>
-                </div>
-                <div class="exp-bar-bg"><div id="exp-bar" class="exp-bar-fill" style="width: 0%;"></div></div>
+    <!-- TOP BAR (User Info) -->
+    <div class="absolute top-6 left-0 w-full px-5 flex justify-between items-start z-50">
+        <div class="flex flex-col gap-3">
+            <div>
+                <p class="text-green-100 text-xs font-bold uppercase tracking-wider mb-0.5">Xin chào nông dân,</p>
+                <h1 id="player-name" class="text-white text-xl font-black shadow-sm">Khách</h1>
             </div>
-
-            <a href="tk.html" class="glass-panel px-4 py-2 rounded-2xl flex items-center gap-2 shadow-lg pointer-events-auto no-underline active:scale-95 transition-transform">
-                <span class="text-xl">💰</span>
-                <span id="gold-val" class="font-black text-orange-600 text-lg">---</span>
-                <div class="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center ml-auto">
-                    <span class="text-[10px] text-orange-600 font-black">+</span>
-                </div>
+            <a href="tk.html" class="glass-panel px-4 py-2.5 rounded-2xl flex items-center gap-2 active:scale-95 transition-transform w-fit no-underline">
+                <span class="text-2xl drop-shadow-md">💰</span>
+                <span id="gold-val" class="font-black text-orange-600 text-xl tracking-tight">---</span>
             </a>
         </div>
-
+        
         <div class="flex flex-col items-end gap-2">
-            <div class="glass-panel px-3 py-2 rounded-xl flex items-center gap-2 shadow-lg pointer-events-auto">
-                <span class="text-xl">☀️</span>
-                <div class="flex flex-col">
-                    <span class="text-[9px] font-bold text-stone-400 uppercase leading-tight">Nông dân</span>
-                    <span id="player-name" class="text-xs font-black text-green-700 leading-tight">Khách</span>
+            <div class="glass-panel px-4 py-1.5 rounded-full flex flex-col items-end min-w-[100px]">
+                <span class="text-[10px] font-bold text-stone-500 uppercase">Cấp độ <span id="lvl-val" class="text-blue-600 font-black">1</span></span>
+                <div class="w-full h-1.5 bg-stone-200 rounded-full mt-1 overflow-hidden">
+                    <div id="exp-bar" class="h-full bg-blue-500" style="width: 0%;"></div>
                 </div>
             </div>
-            
-            <button id="save-btn" class="glass-panel w-10 h-10 rounded-xl flex items-center justify-center shadow-lg pointer-events-auto active:scale-95 transition-transform text-lg">
+            <button id="save-btn" class="glass-panel w-11 h-11 rounded-full flex items-center justify-center active:scale-95 transition-transform text-xl shadow-md">
                 💾
             </button>
         </div>
     </div>
 
-    <!-- UI: TOOL TRAY -->
-    <div class="tool-tray glass-panel" id="tool-tray">
-        <div class="tool-item selected" data-tool="hand" title="Chọn">🖐️</div>
-        <div class="tool-item" data-tool="scythe" title="Thu hoạch">🪓</div>
-        <div class="tool-item" data-tool="water" title="Tưới nước">💧<span class="tool-badge" id="b-water">0</span></div>
-        <div class="tool-item" data-tool="fertilizer" title="Bón phân">💩<span class="tool-badge" id="b-fert">0</span></div>
-        <div class="tool-item" data-tool="seed" title="Gieo hạt">🌱<span class="tool-badge" id="b-seed">0</span></div>
-        <div class="tool-item" data-tool="hoe" title="Mở đất/Nâng cấp">🔨</div>
+    <!-- TABS MÀN HÌNH -->
+    <div class="absolute top-[130px] left-0 w-full px-5 z-20 flex gap-2">
+        <button id="tab-market" class="flex-1 py-3 rounded-2xl font-bold transition-colors bg-white text-green-700 shadow-md">Thị Trường</button>
+        <button id="tab-myfarms" class="flex-1 py-3 rounded-2xl font-bold transition-colors bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm">Trang Trại Của Tôi</button>
+    </div>
+
+    <!-- VÙNG CUỘN (Chứa các gói đầu tư) -->
+    <div class="scroll-area no-scrollbar" id="main-content">
+        <!-- Render nội dung vào đây bằng JS -->
     </div>
 
     <!-- UI: NAVIGATION BAR -->
@@ -164,9 +163,9 @@
         
         <a href="trangchu.html" class="nav-center-wrap text-green-700">
             <div class="nav-center-btn">
-                <span class="text-3xl">🏠</span>
+                <span class="text-3xl pb-1">🌱</span>
             </div>
-            <span class="text-[10px] font-black uppercase mt-12 tracking-wider">Trang trại</span>
+            <span class="text-[10px] font-black uppercase mt-12 tracking-wider">Đầu tư</span>
         </a>
         
         <a href="gt.html" class="nav-item">
@@ -200,128 +199,68 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ================= KHỞI TẠO ĐỒ HỌA (NHÚNG TRỰC TIẾP SVG CHUẨN) =================
-    // Sử dụng Data URI SVG để đảm bảo 100% không bao giờ lỗi hình ảnh
-    const ASSETS = {};
-    function loadSVGImage(svgString) {
-        const img = new Image();
-        img.src = "data:image/svg+xml;utf8," + encodeURIComponent(svgString);
-        return img;
-    }
-
-    // Khối đất Khóa
-    ASSETS.locked = loadSVGImage(`
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-            <polygon points='50,25 100,50 50,75 0,50' fill='#64748b'/>
-            <polygon points='0,50 50,75 50,85 0,60' fill='#475569'/>
-            <polygon points='50,75 100,50 100,60 50,85' fill='#334155'/>
-        </svg>`);
-    
-    // Khối đất Thường
-    ASSETS.soil1 = loadSVGImage(`
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-            <polygon points='50,25 100,50 50,75 0,50' fill='#8b5a2b'/>
-            <polygon points='0,50 50,75 50,85 0,60' fill='#6b4423'/>
-            <polygon points='50,75 100,50 100,60 50,85' fill='#50331a'/>
-        </svg>`);
-
-    // Khối đất VIP
-    ASSETS.soil2 = loadSVGImage(`
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-            <polygon points='50,25 100,50 50,75 0,50' fill='#a67b5b'/>
-            <polygon points='0,50 50,75 50,85 0,60' fill='#8a6244'/>
-            <polygon points='50,75 100,50 100,60 50,85' fill='#6f4f36'/>
-        </svg>`);
-
-    // Viền sáng khi hover
-    ASSETS.highlight = loadSVGImage(`
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-            <polygon points='50,25 100,50 50,75 0,50' fill='rgba(255,255,255,0.2)' stroke='white' stroke-width='3'/>
-        </svg>`);
-
-    // Hình ảnh Cây trồng (Mầm, Đang lớn, Chín)
-    ASSETS.cropSeed = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='40' text-anchor='middle'>🌱</text></svg>`);
-    ASSETS.cropGrow = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='50' text-anchor='middle'>🌿</text></svg>`);
-    ASSETS.cornReady = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='60' text-anchor='middle'>🌽</text></svg>`);
-    ASSETS.pumpkinReady = loadSVGImage(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='65' font-size='60' text-anchor='middle'>🎃</text></svg>`);
-
-    // ================= DỮ LIỆU CỐ ĐỊNH =================
-    const CROPS = {
-        corn: { id: 'corn', name: 'Ngô', emoji: '🌽', time: 10, exp: 10, yield: 2, 
-                imgStages: [ASSETS.cropSeed, ASSETS.cropGrow, ASSETS.cornReady] },
-        pumpkin: { id: 'pumpkin', name: 'Bí Ngô', emoji: '🎃', time: 20, exp: 25, yield: 1,
-                imgStages: [ASSETS.cropSeed, ASSETS.cropGrow, ASSETS.pumpkinReady] }
+    // ================= DỮ LIỆU CÁC GÓI ĐẦU TƯ =================
+    const PACKAGES = {
+        carrot: { 
+            id: 'carrot', name: 'Trang trại Cà rốt', icon: '🥕', 
+            cost: 500, time: 60, yield: 700, exp: 20, 
+            bg: 'from-orange-100 to-orange-50', text: 'text-orange-600',
+            desc: 'Thu hoạch nhanh, phù hợp cho người mới bắt đầu.'
+        },
+        potato: { 
+            id: 'potato', name: 'Trang trại Khoai tây', icon: '🥔', 
+            cost: 2000, time: 300, yield: 3000, exp: 50, 
+            bg: 'from-yellow-100 to-amber-50', text: 'text-yellow-700',
+            desc: 'Lợi nhuận ổn định, rủi ro thấp.'
+        },
+        pumpkin: { 
+            id: 'pumpkin', name: 'Trang trại Bí ngô', icon: '🎃', 
+            cost: 10000, time: 1800, yield: 16000, exp: 150, 
+            bg: 'from-orange-200 to-orange-100', text: 'text-orange-800',
+            desc: 'Cần thời gian lâu nhưng mang lại doanh thu lớn.'
+        },
+        watermelon: { 
+            id: 'watermelon', name: 'Trang trại Dưa hấu', icon: '🍉', 
+            cost: 50000, time: 7200, yield: 85000, exp: 500, 
+            bg: 'from-green-200 to-green-100', text: 'text-green-800',
+            desc: 'Gói VIP. Lợi nhuận khổng lồ, thích hợp đầu tư dài hạn.'
+        }
     };
-
-    const LAND_TIERS = [
-        { name: 'Khóa', cost: 500, img: ASSETS.locked },
-        { name: 'Đất Thường', speed: 1.0, cost: 0, img: ASSETS.soil1 },
-        { name: 'Đất Tốt', speed: 1.5, cost: 2000, img: ASSETS.soil2 }
-    ];
-
-    const gridSize = 8;
-    // Kích thước chuẩn cho ngói Isometric 2:1
-    const tileW = 120;
-    const tileH = 60; 
 
     // ================= TRẠNG THÁI GAME =================
     let state = {
         gold: 1000,
         level: 1,
         exp: 0,
-        currentTool: 'hand',
-        selectedSeed: 'corn',
-        inventory: {
-            seeds: { corn: 10, pumpkin: 5 },
-            crops: { corn: 0, pumpkin: 0 },
-            tools: { water: 15, fertilizer: 5 }
-        },
-        plots: []
+        investments: [] // Mảng chứa các gói đang đầu tư: { id, pkgId, startTime, harvested }
     };
 
-    let camera = { x: 0, y: 0 };
-    let drag = { isDragging: false, startX: 0, startY: 0, lastX: 0, lastY: 0, moved: false };
-    let hoveredTile = { i: -1, j: -1 }; 
-
     let currentUser = null;
-    let gameLoopId;
+    let currentTab = 'market'; // 'market' hoặc 'myfarms'
+    let timerInterval;
 
-    const canvas = document.getElementById('farmCanvas');
-    const ctx = canvas.getContext('2d');
-    const loadingScreen = document.getElementById('loading-screen');
-    const gameContainer = document.getElementById('game-container');
+    const DOM = {
+        loading: document.getElementById('loading-screen'),
+        container: document.getElementById('game-container'),
+        content: document.getElementById('main-content'),
+        goldVal: document.getElementById('gold-val'),
+        lvlVal: document.getElementById('lvl-val'),
+        expBar: document.getElementById('exp-bar'),
+        tabMarket: document.getElementById('tab-market'),
+        tabMyFarms: document.getElementById('tab-myfarms')
+    };
 
     // ================= FIREBASE LOGIC =================
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
-            document.getElementById('player-name').innerText = user.displayName || 'Nông Dân';
+            document.getElementById('player-name').innerText = user.displayName || 'Nhà Đầu Tư';
             await loadGameFromCloud();
             startGame();
         } else {
             window.location.href = 'index.html';
         }
     });
-
-    function createEmptyFarm() {
-        let arr = [];
-        for(let i=0; i<gridSize; i++) {
-            arr[i] = [];
-            for(let j=0; j<gridSize; j++) {
-                let isUnlocked = (i < 2 && j < 2);
-                arr[i][j] = {
-                    tier: isUnlocked ? 1 : 0,
-                    seedKey: null,
-                    progress: 0,
-                    isWatered: false,
-                    isFertilized: false,
-                    status: 'empty', 
-                    lastTick: Date.now()
-                };
-            }
-        }
-        return arr;
-    }
 
     async function loadGameFromCloud() {
         try {
@@ -330,349 +269,298 @@
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                state.gold = data.gold || 1000;
+                state.gold = data.gold ?? 1000;
                 state.level = data.level || 1;
                 state.exp = data.exp || 0;
-                state.inventory = { ...state.inventory, ...data.inventory };
-                
-                let savedPlots = data.plots;
-                let now = Date.now();
-                if(savedPlots && savedPlots.length > 0) {
-                    state.plots = savedPlots.map(row => row.map(p => {
-                        if(p.status === 'growing') {
-                            let offlineSeconds = (now - p.lastTick) / 1000;
-                            if(offlineSeconds < 0) offlineSeconds = 0; 
-                            const crop = CROPS[p.seedKey];
-                            if(crop) {
-                                let multi = LAND_TIERS[p.tier].speed;
-                                if(p.isWatered) multi *= 1.5;
-                                if(p.isFertilized) multi *= 2.0;
-                                p.progress += (100 / crop.time) * multi * offlineSeconds;
-                                if(p.progress >= 100) { p.progress = 100; p.status = 'ready'; }
-                            }
-                        }
-                        p.lastTick = now;
-                        return p;
-                    }));
-                } else {
-                    state.plots = createEmptyFarm();
-                }
+                // Chỉ lấy những khoản đầu tư chưa thu hoạch
+                state.investments = (data.investments || []).filter(inv => !inv.harvested);
             } else {
-                state.plots = createEmptyFarm();
                 await saveGameToCloud(false); 
             }
         } catch (e) {
             console.error("Lỗi tải dữ liệu Cloud:", e);
-            state.plots = createEmptyFarm(); 
         }
     }
 
     async function saveGameToCloud(showNotif = false) {
         if(!currentUser) return;
-        state.plots.forEach(row => row.forEach(p => p.lastTick = Date.now()));
         try {
             await setDoc(doc(db, "users", currentUser.uid), {
                 gold: state.gold, level: state.level, exp: state.exp,
-                inventory: state.inventory, plots: state.plots, lastSaved: new Date()
+                investments: state.investments, lastSaved: new Date()
             }, { merge: true });
-            if(showNotif) showFloat(window.innerWidth/2, 100, "Đã lưu lên Đám mây ☁️", "#22c55e");
+            if(showNotif) showFloat(window.innerWidth/2, 100, "Đã lưu ☁️", "#22c55e");
         } catch(e) {
             console.error("Lỗi lưu Cloud:", e);
-            if(showNotif) showFloat(window.innerWidth/2, 100, "Lỗi mạng!", "#ef4444");
         }
     }
 
-    document.getElementById('save-btn').addEventListener('click', () => {
-        saveGameToCloud(true);
-    });
+    document.getElementById('save-btn').addEventListener('click', () => saveGameToCloud(true));
 
     // ================= KHỞI ĐỘNG GAME =================
     function startGame() {
-        resize();
-        camera.x = canvas.width / 2; 
-        camera.y = canvas.height / 4;
-
-        setupListeners();
         updateUI();
-
-        loadingScreen.style.opacity = '0';
+        renderContent();
+        
+        DOM.loading.style.opacity = '0';
         setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            gameContainer.style.opacity = '1';
+            DOM.loading.style.display = 'none';
+            DOM.container.style.opacity = '1';
         }, 500);
 
-        gameLoopId = requestAnimationFrame(gameLoop);
-        setInterval(() => saveGameToCloud(false), 30000);
+        // Vòng lặp cập nhật thời gian tiến trình mỗi giây
+        timerInterval = setInterval(updateProgressBars, 1000);
+        setInterval(() => saveGameToCloud(false), 30000); // Auto save
     }
 
-    function setupListeners() {
-        window.addEventListener('resize', resize);
-        
-        document.querySelectorAll('.tool-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.tool-item').forEach(i => i.classList.remove('selected'));
-                item.classList.add('selected');
-                state.currentTool = item.dataset.tool;
-            });
-        });
+    // ================= RENDER GIAO DIỆN CHÍNH =================
+    DOM.tabMarket.addEventListener('click', () => switchTab('market'));
+    DOM.tabMyFarms.addEventListener('click', () => switchTab('myfarms'));
 
-        canvas.addEventListener('mousedown', onDragStart);
-        window.addEventListener('mousemove', onDragMove);
-        window.addEventListener('mouseup', onDragEnd);
-
-        canvas.addEventListener('touchstart', (e) => onDragStart(e.touches[0]), {passive: false});
-        window.addEventListener('touchmove', (e) => { e.preventDefault(); onDragMove(e.touches[0]); }, {passive: false});
-        window.addEventListener('touchend', onDragEnd);
+    function switchTab(tab) {
+        currentTab = tab;
+        if(tab === 'market') {
+            DOM.tabMarket.className = "flex-1 py-3 rounded-2xl font-bold transition-colors bg-white text-green-700 shadow-md";
+            DOM.tabMyFarms.className = "flex-1 py-3 rounded-2xl font-bold transition-colors bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm";
+        } else {
+            DOM.tabMyFarms.className = "flex-1 py-3 rounded-2xl font-bold transition-colors bg-white text-green-700 shadow-md";
+            DOM.tabMarket.className = "flex-1 py-3 rounded-2xl font-bold transition-colors bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm";
+        }
+        renderContent();
     }
 
-    // --- PAN CAMERA & HOVER ---
-    function onDragStart(e) {
-        drag.isDragging = true; drag.moved = false;
-        drag.startX = e.clientX; drag.startY = e.clientY;
-        drag.lastX = e.clientX; drag.lastY = e.clientY;
-    }
-    
-    function onDragMove(e) {
-        const rect = canvas.getBoundingClientRect();
-        const sx = e.clientX - rect.left; const sy = e.clientY - rect.top;
-        hoveredTile = screenToGrid(sx, sy);
-
-        if(!drag.isDragging) return;
-        const dx = e.clientX - drag.lastX;
-        const dy = e.clientY - drag.lastY;
-        
-        if(Math.abs(e.clientX - drag.startX) > 5 || Math.abs(e.clientY - drag.startY) > 5) drag.moved = true;
-
-        camera.x += dx; camera.y += dy;
-
-        const minX = -canvas.width; const maxX = canvas.width * 2;
-        const minY = -canvas.height; const maxY = canvas.height * 1.5;
-        camera.x = Math.max(minX, Math.min(maxX, camera.x));
-        camera.y = Math.max(minY, Math.min(maxY, camera.y));
-
-        drag.lastX = e.clientX; drag.lastY = e.clientY;
-    }
-    
-    function onDragEnd(e) {
-        drag.isDragging = false;
-        if(!drag.moved) handleAction(drag.startX, drag.startY);
-    }
-
-    // --- TƯƠNG TÁC ĐẤT ---
-    function handleAction(clientX, clientY) {
-        const rect = canvas.getBoundingClientRect();
-        const sx = clientX - rect.left; const sy = clientY - rect.top;
-        const grid = screenToGrid(sx, sy);
-        if(grid.i >= 0 && grid.i < gridSize && grid.j >= 0 && grid.j < gridSize) {
-            applyTool(grid.i, grid.j, sx, sy);
+    function renderContent() {
+        DOM.content.innerHTML = '';
+        if(currentTab === 'market') {
+            renderMarket();
+        } else {
+            renderMyFarms();
         }
     }
 
-    function applyTool(i, j, sx, sy) {
-        const p = state.plots[i][j];
+    // --- TAB 1: THỊ TRƯỜNG (MUA GÓI) ---
+    function renderMarket() {
+        const wrapper = document.createElement('div');
+        wrapper.className = "space-y-4 pb-10";
 
-        if(p.tier === 0) {
-            if (state.currentTool === 'hoe' || state.currentTool === 'hand') {
-                if(state.gold >= LAND_TIERS[0].cost) {
-                    state.gold -= LAND_TIERS[0].cost;
-                    p.tier = 1;
-                    showFloat(sx, sy, "🔓 Mở khóa đất", "#f59e0b");
-                    updateUI();
-                } else showFloat(sx, sy, "Thiếu vàng!", "#ef4444");
-            }
+        Object.values(PACKAGES).forEach(pkg => {
+            const canAfford = state.gold >= pkg.cost;
+            const card = document.createElement('div');
+            card.className = `invest-card bg-gradient-to-br ${pkg.bg} p-4 rounded-3xl border border-white shadow-sm flex flex-col`;
+            
+            card.innerHTML = `
+                <div class="flex gap-4 items-center mb-3">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-sm shrink-0">
+                        ${pkg.icon}
+                    </div>
+                    <div>
+                        <h3 class="font-black text-[17px] text-stone-800 leading-tight mb-1">${pkg.name}</h3>
+                        <p class="text-[11px] text-stone-500 leading-snug">${pkg.desc}</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <div class="bg-white/60 p-2 rounded-xl text-center">
+                        <p class="text-[10px] text-stone-500 font-bold uppercase">Thời gian</p>
+                        <p class="font-black ${pkg.text}">${formatTime(pkg.time)}</p>
+                    </div>
+                    <div class="bg-white/60 p-2 rounded-xl text-center">
+                        <p class="text-[10px] text-stone-500 font-bold uppercase">Thu về</p>
+                        <p class="font-black text-green-600">${pkg.yield.toLocaleString()} 💰</p>
+                    </div>
+                </div>
+                <button class="w-full py-3.5 rounded-xl font-black text-white shadow-md transition-colors ${canAfford ? 'bg-green-600 hover:bg-green-700' : 'bg-stone-300'}" 
+                        ${canAfford ? '' : 'disabled'}
+                        onclick="invest('${pkg.id}', event)">
+                    ${canAfford ? `ĐẦU TƯ (${pkg.cost.toLocaleString()} 💰)` : 'CHƯA ĐỦ VÀNG'}
+                </button>
+            `;
+            wrapper.appendChild(card);
+        });
+        DOM.content.appendChild(wrapper);
+    }
+
+    // --- TAB 2: TRANG TRẠI CỦA TÔI ---
+    function renderMyFarms() {
+        const wrapper = document.createElement('div');
+        wrapper.className = "space-y-4 pb-10";
+
+        if(state.investments.length === 0) {
+            wrapper.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 opacity-50">
+                    <span class="text-6xl mb-4 grayscale">🚜</span>
+                    <p class="font-bold text-stone-600">Bạn chưa có trang trại nào.</p>
+                    <p class="text-xs text-stone-500">Hãy sang Thị Trường để đầu tư nhé!</p>
+                </div>
+            `;
+            DOM.content.appendChild(wrapper);
             return;
         }
 
-        switch(state.currentTool) {
-            case 'hand':
-            case 'scythe':
-                if(p.status === 'ready') harvest(i, j, sx, sy);
-                else if(p.status === 'growing') showFloat(sx, sy, "⏳ Chưa chín!", "#9ca3af");
-                break;
-            case 'water':
-                if(p.status === 'growing' && !p.isWatered) {
-                    if(state.inventory.tools.water > 0) {
-                        p.isWatered = true; state.inventory.tools.water--;
-                        showFloat(sx, sy, "💧 Đã tưới", "#3b82f6");
-                        updateUI();
-                    } else showFloat(sx, sy, "Hết nước!", "#ef4444");
-                }
-                break;
-            case 'fertilizer':
-                if(p.status === 'growing' && !p.isFertilized) {
-                    if(state.inventory.tools.fertilizer > 0) {
-                        p.isFertilized = true; state.inventory.tools.fertilizer--;
-                        showFloat(sx, sy, "💩 Đã bón", "#22c55e");
-                        updateUI();
-                    } else showFloat(sx, sy, "Hết phân bón!", "#ef4444");
-                }
-                break;
-            case 'seed':
-                if(p.status === 'empty') {
-                    if(state.inventory.seeds[state.selectedSeed] > 0) {
-                        p.seedKey = state.selectedSeed;
-                        p.status = 'growing';
-                        p.progress = 0;
-                        p.startTime = Date.now();
-                        state.inventory.seeds[state.selectedSeed]--;
-                        showFloat(sx, sy, "🌱 Gieo hạt", "#10b981");
-                        updateUI();
-                    } else showFloat(sx, sy, "Hết hạt giống!", "#ef4444");
-                }
-                break;
-            case 'hoe':
-                if(p.status === 'empty' && p.tier === 1 && state.gold >= LAND_TIERS[2].cost) {
-                    state.gold -= LAND_TIERS[2].cost;
-                    p.tier = 2;
-                    showFloat(sx, sy, "⭐ Nâng cấp!", "#f59e0b");
-                    updateUI();
-                }
-                break;
+        // Đảo ngược mảng để cái mới mua nằm trên cùng
+        [...state.investments].reverse().forEach(inv => {
+            const pkg = PACKAGES[inv.pkgId];
+            if(!pkg) return; // Phòng lỗi data
+
+            const card = document.createElement('div');
+            card.className = `glass-panel p-4 rounded-3xl relative overflow-hidden invest-card`;
+            card.id = `inv-card-${inv.id}`;
+            
+            // Vẽ ban đầu, thanh tiến trình sẽ được hàm updateProgressBars cập nhật ngay sau đó
+            card.innerHTML = `
+                <div class="flex gap-4 items-center mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br ${pkg.bg} rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-white shrink-0">
+                        ${pkg.icon}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-black text-[15px] text-stone-800">${pkg.name}</h3>
+                            <span class="font-black text-green-600">+${pkg.yield.toLocaleString()} 💰</span>
+                        </div>
+                        <p class="text-[11px] text-stone-500 font-bold mb-1 status-text" id="status-${inv.id}">Đang sinh trưởng...</p>
+                        
+                        <div class="progress-bg">
+                            <div class="progress-fill bg-blue-500" id="prog-${inv.id}" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="w-full py-3 rounded-xl font-black text-white bg-blue-500 opacity-50 cursor-not-allowed transition-all harvest-btn" 
+                        id="btn-${inv.id}" disabled>
+                    ĐANG TRỒNG (<span id="time-${inv.id}">--:--</span>)
+                </button>
+            `;
+            wrapper.appendChild(card);
+        });
+
+        DOM.content.appendChild(wrapper);
+        updateProgressBars(); // Cập nhật ngay tiến trình sau khi render
+    }
+
+    // ================= LOGIC ĐẦU TƯ & THU HOẠCH =================
+    window.invest = function(pkgId, e) {
+        const pkg = PACKAGES[pkgId];
+        if(state.gold >= pkg.cost) {
+            state.gold -= pkg.cost;
+            const newInv = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                pkgId: pkgId,
+                startTime: Date.now(),
+                harvested: false
+            };
+            state.investments.push(newInv);
+            
+            updateUI();
+            saveGameToCloud();
+            
+            // Lấy tọa độ click để hiện chữ nổi
+            const rect = e.target.getBoundingClientRect();
+            showFloat(rect.left + rect.width/2, rect.top, `-${pkg.cost} 💰`, "#ef4444");
+            
+            // Tự động chuyển sang tab Trang trại của tôi
+            setTimeout(() => switchTab('myfarms'), 300);
         }
-    }
+    };
 
-    function harvest(i, j, sx, sy) {
-        const p = state.plots[i][j];
-        const crop = CROPS[p.seedKey];
-        state.inventory.crops[p.seedKey] += crop.yield;
-        state.gold += crop.yield * 10; 
-        addExp(crop.exp, sx, sy);
-        p.status = 'empty'; p.seedKey = null; p.isWatered = false; p.isFertilized = false; p.progress = 0;
-        showFloat(sx, sy-20, `+${crop.yield} ${crop.emoji}`, "#f59e0b");
-        showFloat(sx, sy, `+${crop.yield * 10} 💰`, "#facc15");
+    window.harvest = function(invId, e) {
+        const invIndex = state.investments.findIndex(i => i.id === invId);
+        if(invIndex === -1) return;
+        
+        const inv = state.investments[invIndex];
+        const pkg = PACKAGES[inv.pkgId];
+
+        // Cộng tiền và kinh nghiệm
+        state.gold += pkg.yield;
+        addExp(pkg.exp);
+        
+        // Đánh dấu đã thu hoạch và xóa khỏi mảng
+        state.investments.splice(invIndex, 1);
+        
         updateUI();
-    }
+        saveGameToCloud();
+        
+        const rect = e.target.getBoundingClientRect();
+        showFloat(rect.left + rect.width/2, rect.top, `+${pkg.yield.toLocaleString()} 💰`, "#f59e0b");
+        
+        // Xóa thẻ khỏi UI mượt mà
+        const card = document.getElementById(`inv-card-${invId}`);
+        if(card) {
+            card.style.transform = "scale(0.8)";
+            card.style.opacity = "0";
+            setTimeout(() => { card.remove(); if(state.investments.length === 0) renderMyFarms(); }, 300);
+        }
+    };
 
-    function addExp(amount, sx, sy) {
+    function addExp(amount) {
         state.exp += amount;
         let maxExp = state.level * 100;
         if(state.exp >= maxExp) {
             state.exp -= maxExp;
             state.level++;
-            showFloat(sx, sy-40, `🎉 Lên Cấp ${state.level}!`, "#3b82f6");
-            state.gold += 500;
+            state.gold += 1000; // Thưởng thăng cấp
+            showFloat(window.innerWidth/2, 150, `🎉 Lên Cấp ${state.level}!`, "#3b82f6");
         }
     }
 
-    // --- GAME LOOP & RENDER CHÍNH XÁC ---
-    function gameLoop() {
+    // ================= LOOP CẬP NHẬT THỜI GIAN =================
+    function updateProgressBars() {
+        if(currentTab !== 'myfarms') return;
+
         const now = Date.now();
-        state.plots.forEach(row => row.forEach(p => {
-            if(p.status === 'growing') {
-                const crop = CROPS[p.seedKey];
-                const dt = (now - p.lastTick) / 1000;
-                let multi = LAND_TIERS[p.tier].speed;
-                if(p.isWatered) multi *= 1.5;
-                if(p.isFertilized) multi *= 2.0;
-                p.progress += (100 / crop.time) * multi * dt;
-                if(p.progress >= 100) { p.progress = 100; p.status = 'ready'; }
+        state.investments.forEach(inv => {
+            const pkg = PACKAGES[inv.pkgId];
+            if(!pkg) return;
+
+            const elapsedSec = (now - inv.startTime) / 1000;
+            let percent = (elapsedSec / pkg.time) * 100;
+            
+            const bar = document.getElementById(`prog-${inv.id}`);
+            const btn = document.getElementById(`btn-${inv.id}`);
+            const timeTxt = document.getElementById(`time-${inv.id}`);
+            const statusTxt = document.getElementById(`status-${inv.id}`);
+
+            if(!bar || !btn) return;
+
+            if (percent >= 100) {
+                percent = 100;
+                bar.style.width = '100%';
+                bar.className = "progress-fill bg-green-500";
+                
+                statusTxt.innerText = "Sẵn sàng thu hoạch!";
+                statusTxt.className = "text-[11px] font-black mb-1 text-green-600";
+                
+                // Đổi nút thành nút Thu Hoạch
+                if(btn.disabled) {
+                    btn.disabled = false;
+                    btn.className = "w-full py-3 rounded-xl font-black text-white bg-green-500 hover:bg-green-600 shadow-lg shadow-green-200 ready-pulse active:scale-95 transition-all";
+                    btn.innerHTML = `THU HOẠCH NGAY`;
+                    btn.onclick = (e) => harvest(inv.id, e);
+                }
+            } else {
+                bar.style.width = `${percent}%`;
+                const remSec = Math.ceil(pkg.time - elapsedSec);
+                timeTxt.innerText = formatTime(remSec);
             }
-            p.lastTick = now;
-        }));
-        draw();
-        gameLoopId = requestAnimationFrame(gameLoop);
+        });
     }
 
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        for (let i = 0; i < gridSize; i++) {
-            for (let j = 0; j < gridSize; j++) {
-                const p = state.plots[i][j];
-                const pos = gridToScreen(i, j);
-
-                // Tọa độ vẽ ảnh (Vì SVG Box là 100x100, ta vẽ ra hình vuông tileW x tileW)
-                // Đỉnh của viên kim cương ở y = 25% chiều cao ảnh, nên ta phải offset Y để khớp với pos.y
-                const imgX = pos.x - tileW/2;
-                const imgY = pos.y - (tileW * 0.25);
-
-                // 1. VẼ ĐẤT (TILES)
-                const tInfo = LAND_TIERS[p.tier];
-                ctx.drawImage(tInfo.img, imgX, imgY, tileW, tileW);
-
-                // 2. HIGHLIGHT KHI HOVER
-                if(i === hoveredTile.i && j === hoveredTile.j) {
-                    ctx.drawImage(ASSETS.highlight, imgX, imgY, tileW, tileW);
-                }
-
-                // 3. HIỆU ỨNG TƯỚI/BÓN
-                if(p.tier > 0 && (p.isFertilized || p.isWatered)) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(pos.x, pos.y); 
-                    ctx.lineTo(pos.x + tileW/2, pos.y + tileH/2);
-                    ctx.lineTo(pos.x, pos.y + tileH); 
-                    ctx.lineTo(pos.x - tileW/2, pos.y + tileH/2);
-                    ctx.closePath();
-                    
-                    if(p.isFertilized) { ctx.fillStyle = 'rgba(234, 179, 8, 0.2)'; ctx.fill(); }
-                    if(p.isWatered) { ctx.fillStyle = 'rgba(59, 130, 246, 0.2)'; ctx.fill(); }
-                    ctx.restore();
-                }
-
-                // 4. ICON Ổ KHÓA
-                if(p.tier === 0) {
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.beginPath(); ctx.arc(pos.x, pos.y + tileH/2, 14, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = '#fff'; ctx.font = '14px Arial'; ctx.textAlign = 'center'; 
-                    ctx.fillText('🔒', pos.x, pos.y + tileH/2 + 5);
-                    ctx.font = 'bold 12px Lexend';
-                    ctx.fillText(tInfo.cost + ' 💰', pos.x, pos.y + tileH/2 + 25);
-                } 
-                // 5. VẼ CÂY & TIẾN TRÌNH
-                else if(p.seedKey) {
-                    const crop = CROPS[p.seedKey];
-                    let imgToDraw = crop.imgStages[0];
-                    if(p.status === 'ready') imgToDraw = crop.imgStages[2];
-                    else if(p.progress > 50) imgToDraw = crop.imgStages[1];
-
-                    // Vẽ cây nằm gọn lên trên mặt đất
-                    let cY = imgY - 10; 
-                    if(p.status === 'ready') cY += Math.sin(Date.now()/200) * 3; // Nảy nảy
-                    ctx.drawImage(imgToDraw, imgX, cY, tileW, tileW);
-
-                    // Thanh tiến trình
-                    if(p.status === 'growing') {
-                        const barW = 40;
-                        const barY = pos.y - 10;
-                        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(pos.x - barW/2, barY, barW, 5);
-                        ctx.fillStyle = '#10b981'; ctx.fillRect(pos.x - barW/2, barY, barW * (p.progress/100), 5);
-                        
-                        if(p.isWatered) { ctx.font = '10px Arial'; ctx.fillText('💧', pos.x - 25, barY + 5); }
-                        if(p.isFertilized) { ctx.font = '10px Arial'; ctx.fillText('💩', pos.x + 25, barY + 5); }
-                    }
-                }
-            }
-        }
-    }
-
-    // Tọa độ chuẩn xác 100%
-    function gridToScreen(i, j) { 
-        return { 
-            x: camera.x + (i - j) * (tileW/2), 
-            y: camera.y + (i + j) * (tileH/2) 
-        }; 
-    }
-    
-    function screenToGrid(sx, sy) {
-        const dx = sx - camera.x;
-        const dy = sy - camera.y;
-        const i = (dy / (tileH/2) + dx / (tileW/2)) / 2;
-        const j = (dy / (tileH/2) - dx / (tileW/2)) / 2;
-        return { i: Math.floor(i), j: Math.floor(j) };
-    }
-
-    // ================= UI CẬP NHẬT =================
+    // ================= CÔNG CỤ HỖ TRỢ =================
     function updateUI() {
-        document.getElementById('gold-val').innerText = state.gold.toLocaleString();
-        document.getElementById('lvl-val').innerText = state.level;
+        DOM.goldVal.innerText = state.gold.toLocaleString();
+        DOM.lvlVal.innerText = state.level;
         let maxExp = state.level * 100;
-        document.getElementById('exp-val').innerText = `${Math.floor(state.exp)}/${maxExp}`;
-        document.getElementById('exp-bar').style.width = `${(state.exp / maxExp) * 100}%`;
+        DOM.expBar.style.width = `${(state.exp / maxExp) * 100}%`;
+        
+        // Nếu đang ở tab Market, cập nhật lại để nút Mua disable/enable tùy lượng vàng
+        if(currentTab === 'market') renderMarket();
+    }
 
-        document.getElementById('b-water').innerText = state.inventory.tools.water;
-        document.getElementById('b-fert').innerText = state.inventory.tools.fertilizer;
-        document.getElementById('b-seed').innerText = state.inventory.seeds[state.selectedSeed] || 0;
+    function formatTime(seconds) {
+        if(seconds < 60) return `${seconds} giây`;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        if(m < 60) return `${m}p ${s}s`;
+        const h = Math.floor(m / 60);
+        const rm = m % 60;
+        return `${h}h ${rm}p`;
     }
 
     function showFloat(x, y, txt, color) {
@@ -681,11 +569,6 @@
         div.style.left = x + 'px'; div.style.top = y + 'px'; div.style.color = color;
         document.body.appendChild(div);
         setTimeout(() => div.remove(), 1200);
-    }
-
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
     }
 
 </script>
