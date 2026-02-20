@@ -5,22 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Nông Trại Heo Con - Đăng Nhập</title>
   
-  <!-- Thư viện Tailwind CSS để styling -->
+  <!-- Thư viện Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Thư viện Icon Lucide -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Các hiệu ứng phụ trợ */
-    .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-    .slide-in-top { animation: slideInTop 0.5s ease-out forwards; }
+    .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    .slide-in-top { animation: slideInTop 0.4s ease-out forwards; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes slideInTop { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     
     /* Chống kéo/phóng to trên điện thoại */
     body { touch-action: manipulation; }
-    input { font-size: 16px !important; } /* Tránh iOS tự động zoom */
+    input { font-size: 16px !important; } 
     
     /* Ẩn thanh cuộn nhưng vẫn cuộn được */
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -138,10 +137,12 @@
       </div>
     </div>
 
-    <!-- BODY CUỘN ĐƯỢC -->
-    <div id="scrollContainer" class="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-16 py-4 sm:py-6 bg-white relative scroll-smooth flex flex-col no-scrollbar">
+    <!-- BODY CUỘN ĐƯỢC (Đã sửa lỗi không thấy mục trên cùng) -->
+    <!-- Xóa flex, justify-center, my-auto để form luôn bám lên trên cùng khi bị dài -->
+    <div id="scrollContainer" class="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-16 bg-white relative scroll-smooth no-scrollbar">
       
-      <div class="w-full max-w-md mx-auto lg:mx-0 my-auto flex flex-col justify-center min-h-full">
+      <!-- Thêm py-6 sm:py-10 để tạo khoảng cách đẹp trên/dưới -->
+      <div class="w-full max-w-md mx-auto lg:mx-0 py-6 sm:py-10">
         
         <!-- Màn hình thành công (Ẩn mặc định) -->
         <div id="successScreen" class="hidden text-center py-8 sm:py-12 fade-in">
@@ -254,7 +255,7 @@
         </div>
           
         <!-- Điều khoản -->
-        <p id="termsText" class="mt-4 sm:mt-6 text-center text-[11px] sm:text-sm text-stone-500 px-2 pb-4 hidden">
+        <p id="termsText" class="mt-4 sm:mt-6 text-center text-[11px] sm:text-sm text-stone-500 px-2 hidden">
           Bằng việc đăng ký, bạn đồng ý với <a href="#" class="text-pink-600 hover:underline font-medium">Điều khoản</a> và <a href="#" class="text-pink-600 hover:underline font-medium">Bảo mật</a>.
         </p>
 
@@ -329,7 +330,7 @@
     function toggleMode(toLogin) {
       isLoginMode = toLogin;
       errorMsgBox.classList.add('hidden');
-      scrollContainer.scrollTop = 0; // Cuộn lên đầu
+      scrollContainer.scrollTop = 0; // Luôn đưa con cuộn về trên cùng
 
       if (toLogin) {
         // UI Tab
@@ -384,7 +385,7 @@
       errorMsgBox.classList.add('hidden');
     });
 
-    // Reset lỗi khi gõ vào bất kỳ ô nào
+    // Reset lỗi khi gõ
     [inputPhone, inputPassword, inputConfirm].forEach(input => {
       input.addEventListener('input', () => errorMsgBox.classList.add('hidden'));
     });
@@ -454,4 +455,5 @@
   </script>
 </body>
 </html>
+
 
