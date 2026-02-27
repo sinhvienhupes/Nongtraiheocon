@@ -1,9 +1,29 @@
-const TelegramBot = require('node-telegram-bot-api');
-const mongoose = require('mongoose');
+require("dotenv").config();
 
-const token = process.env.TOKEN;
-mongoose.connect(process.env.MONGO_URL);
+const TelegramBot = require("node-telegram-bot-api");
+const mongoose = require("mongoose");
+const express = require("express");
 
+// ====== KIỂM TRA ENV ======
+if (!process.env.TOKEN) {
+  console.error("❌ Thiếu TOKEN");
+  process.exit(1);
+}
+
+if (!process.env.MONGO_URL) {
+  console.error("❌ Thiếu MONGO_URL");
+  process.exit(1);
+}
+
+// ====== KẾT NỐI MONGODB ======
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => {
+    console.error("❌ MongoDB Error:", err);
+    process.exit(1);
+  });
+
+// ====== MODEL ======
 const userSchema = new mongoose.Schema({
   chatId: String,
   goal: Number,
@@ -13,14 +33,19 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
-const bot = new TelegramBot(token, { polling: true });
+// ====== BOT ======
+const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 
+console.log("🤖 Bot is running...");
+
+// ====== PROGRESS BAR ======
 function progressBar(percent) {
   const total = 20;
   const filled = Math.round((percent / 100) * total);
   return "🟩".repeat(filled) + "⬜".repeat(total - filled);
 }
 
+// ====== MENU ======
 async function mainMenu(chatId) {
   let user = await User.findOne({ chatId });
 
@@ -55,24 +80,24 @@ ${progressBar(percent)}`,
   );
 }
 
+// ====== START ======
 bot.onText(/\/start/, (msg) => {
   mainMenu(msg.chat.id.toString());
 });
 
+// ====== CALLBACK ======
 bot.on("callback_query", async (query) => {
   const chatId = query.message.chat.id.toString();
   let user = await User.findOne({ chatId });
-
   if (!user) return;
 
-  // Thêm tiền
   if (query.data === "add") {
     bot.sendMessage(chatId, "Nhập số tiền:");
     bot.once("message", async (msg) => {
       const amount = parseInt(msg.text);
       if (isNaN(amount)) return;
 
-      const today = new Date().toLocaleDateString('vi-VN');
+      const today = new Date().toLocaleDateString("vi-VN");
       user.total += amount;
       user.history.push({ date: today, amount });
       await user.save();
@@ -80,7 +105,6 @@ bot.on("callback_query", async (query) => {
     });
   }
 
-  // Sao kê
   if (query.data === "history") {
     if (user.history.length === 0)
       return bot.sendMessage(chatId, "Chưa có giao dịch.");
@@ -93,57 +117,6 @@ bot.on("callback_query", async (query) => {
     bot.sendMessage(chatId, text);
   }
 
-  // Sửa giao dịch
-  if (query.data === "edit") {
-    bot.sendMessage(chatId, "Nhập số thứ tự giao dịch cần sửa:");
-    bot.once("message", async (msg) => {
-      const index = parseInt(msg.text) - 1;
-      if (!user.history[index]) return;
-
-      bot.sendMessage(chatId, "Nhập số tiền mới:");
-      bot.once("message", async (msg2) => {
-        const newAmount = parseInt(msg2.text);
-        if (isNaN(newAmount)) return;
-
-        user.total -= user.history[index].amount;
-        user.history[index].amount = newAmount;
-        user.total += newAmount;
-
-        await user.save();
-        mainMenu(chatId);
-      });
-    });
-  }
-
-  // Xoá giao dịch
-  if (query.data === "delete") {
-    bot.sendMessage(chatId, "Nhập số thứ tự giao dịch cần xoá:");
-    bot.once("message", async (msg) => {
-      const index = parseInt(msg.text) - 1;
-      if (!user.history[index]) return;
-
-      user.total -= user.history[index].amount;
-      user.history.splice(index, 1);
-
-      await user.save();
-      mainMenu(chatId);
-    });
-  }
-
-  // Đặt mục tiêu
-  if (query.data === "setgoal") {
-    bot.sendMessage(chatId, "Nhập mục tiêu mới:");
-    bot.once("message", async (msg) => {
-      const goal = parseInt(msg.text);
-      if (isNaN(goal)) return;
-
-      user.goal = goal;
-      await user.save();
-      mainMenu(chatId);
-    });
-  }
-
-  // Xoá mục tiêu
   if (query.data === "deletegoal") {
     user.goal = 0;
     user.total = 0;
@@ -153,4 +126,15 @@ bot.on("callback_query", async (query) => {
   }
 
   bot.answerCallbackQuery(query.id);
+});
+
+// ====== EXPRESS SERVER (BẮT BUỘC CHO RENDER) ======
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Bot đang chạy ✅");
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log("🌐 Server is running");
 });
