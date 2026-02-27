@@ -1,164 +1,133 @@
 require("dotenv").config();
-
 const TelegramBot = require("node-telegram-bot-api");
 const mongoose = require("mongoose");
-const express = require("express");
 
-// ====== KIỂM TRA ENV ======
-if (!process.env.TOKEN) {
-  console.error("❌ Thiếu TOKEN");
-  process.exit(1);
-}
+const bot = new TelegramBot(process.env.TOKEN, { polling: true });
 
-if (!process.env.MONGO_URL) {
-  console.error("❌ Thiếu MONGO_URL");
-  process.exit(1);
-}
+mongoose.connect(process.env.MONGO_URI);
 
-// ====== KẾT NỐI MONGODB ======
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => {
-    console.error("❌ MongoDB Error:", err.message);
-    process.exit(1);
-  });
-
-// ====== MODEL ======
+// ===== SCHEMA =====
 const userSchema = new mongoose.Schema({
   chatId: String,
-  goal: { type: Number, default: 0 },
-  total: { type: Number, default: 0 },
-  history: [{ date: String, amount: Number }]
+  username: String,
+  totalDeposit: { type: Number, default: 0 },
+  totalWithdraw: { type: Number, default: 0 },
+  history: [{
+    type: String,
+    amount: Number,
+    date: { type: Date, default: Date.now }
+  }]
 });
 
 const User = mongoose.model("User", userSchema);
 
-// ====== TELEGRAM BOT (Polling ổn định) ======
-const bot = new TelegramBot(process.env.TOKEN, {
-  polling: {
-    interval: 300,
-    autoStart: true,
-    params: {
-      timeout: 10
-    }
-  }
-});
-
-bot.on("polling_error", (err) => {
-  console.error("❌ Polling Error:", err.message);
-});
-
-console.log("🤖 Bot is running...");
-
-// ====== PROGRESS BAR ======
-function progressBar(percent) {
-  const total = 20;
-  const filled = Math.round((percent / 100) * total);
-  return "🟩".repeat(filled) + "⬜".repeat(total - filled);
-}
-
-// ====== MENU ======
-async function mainMenu(chatId) {
-  let user = await User.findOne({ chatId });
-
+async function getUser(msg) {
+  let user = await User.findOne({ chatId: msg.chat.id });
   if (!user) {
-    user = await User.create({ chatId });
+    user = await User.create({
+      chatId: msg.chat.id,
+      username: msg.from.first_name || "Khách"
+    });
   }
-
-  const percent = user.goal > 0
-    ? ((user.total / user.goal) * 100).toFixed(1)
-    : 0;
-
-  bot.sendMessage(chatId,
-`🏦 ỨNG DỤNG TIẾT KIỆM
-
-🎯 ${user.goal.toLocaleString()} VND
-💰 ${user.total.toLocaleString()} VND
-📊 ${percent}%
-
-${progressBar(percent)}`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "➕ Nạp tiền", callback_data: "add" }],
-          [{ text: "📑 Sao kê", callback_data: "history" }],
-          [{ text: "⚙ Đặt mục tiêu", callback_data: "setgoal" }],
-          [{ text: "❌ Xoá mục tiêu", callback_data: "deletegoal" }]
-        ]
-      }
-    }
-  );
+  return user;
 }
 
-// ====== START ======
-bot.onText(/\/start/, (msg) => {
-  mainMenu(msg.chat.id.toString());
+function formatMoney(num) {
+  return num.toLocaleString("vi-VN") + " VNĐ";
+}
+
+async function mainMenu(msg) {
+  const user = await getUser(msg);
+  const balance = user.totalDeposit - user.totalWithdraw;
+
+  const text = `
+🏦 OKEMA BANKING BOT
+
+👤 Khách hàng: ${user.username}
+🆔 ID: ${user.chatId}
+
+💰 SỐ DƯ HIỆN TẠI: ${formatMoney(balance)}
+────────────────────
+Chọn chức năng bên dưới:
+`;
+
+  bot.sendMessage(msg.chat.id, text, {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: "💰 Nạp tiền", callback_data: "deposit" }],
+        [{ text: "📜 Lịch sử", callback_data: "history" }],
+        [{ text: "📊 Thống kê", callback_data: "summary" }],
+        [{ text: "✏️ Chỉnh sửa", callback_data: "edit" }],
+        [{ text: "🗑 Reset", callback_data: "reset" }]
+      ]
+    }
+  });
+}
+
+// ===== START =====
+bot.onText(/\/start/, async (msg) => {
+  await mainMenu(msg);
 });
 
-// ====== CALLBACK ======
+// ===== CALLBACK =====
 bot.on("callback_query", async (query) => {
-  const chatId = query.message.chat.id.toString();
-  let user = await User.findOne({ chatId });
-  if (!user) return;
+  const chatId = query.message.chat.id;
+  const user = await User.findOne({ chatId });
 
-  if (query.data === "add") {
-    bot.sendMessage(chatId, "Nhập số tiền:");
+  // NẠP TIỀN
+  if (query.data === "deposit") {
+    bot.sendMessage(chatId, "Nhập số tiền muốn nạp:");
     bot.once("message", async (msg) => {
-      const amount = parseInt(msg.text);
-      if (isNaN(amount)) return bot.sendMessage(chatId, "❌ Số không hợp lệ");
-
-      const today = new Date().toLocaleDateString("vi-VN");
-      user.total += amount;
-      user.history.push({ date: today, amount });
-      await user.save();
-      mainMenu(chatId);
+      const amount = Number(msg.text);
+      if (!isNaN(amount) && amount > 0) {
+        user.totalDeposit += amount;
+        user.history.push({ type: "Nạp", amount });
+        await user.save();
+        bot.sendMessage(chatId, "✅ Nạp thành công!");
+        mainMenu(msg);
+      }
     });
   }
 
+  // LỊCH SỬ
   if (query.data === "history") {
-    if (user.history.length === 0)
-      return bot.sendMessage(chatId, "Chưa có giao dịch.");
+    if (user.history.length === 0) {
+      bot.sendMessage(chatId, "Chưa có giao dịch.");
+      return;
+    }
 
-    let text = "📑 SAO KÊ\n\n";
+    let text = "📜 LỊCH SỬ:\n\n";
     user.history.forEach((h, i) => {
-      text += `${i + 1}. ${h.date} - ${h.amount.toLocaleString()} VND\n`;
+      text += `${i+1}. ${h.type} ${formatMoney(h.amount)} - ${new Date(h.date).toLocaleString("vi-VN")}\n`;
     });
 
     bot.sendMessage(chatId, text);
   }
 
-  if (query.data === "setgoal") {
-    bot.sendMessage(chatId, "Nhập mục tiêu mới:");
-    bot.once("message", async (msg) => {
-      const goal = parseInt(msg.text);
-      if (isNaN(goal)) return bot.sendMessage(chatId, "❌ Số không hợp lệ");
+  // THỐNG KÊ
+  if (query.data === "summary") {
+    const balance = user.totalDeposit - user.totalWithdraw;
 
-      user.goal = goal;
-      await user.save();
-      mainMenu(chatId);
-    });
+    const text = `
+📊 THỐNG KÊ
+
+Tổng đã nạp: ${formatMoney(user.totalDeposit)}
+Tổng đã rút: ${formatMoney(user.totalWithdraw)}
+Số dư hiện tại: ${formatMoney(balance)}
+Số giao dịch: ${user.history.length}
+`;
+
+    bot.sendMessage(chatId, text);
   }
 
-  if (query.data === "deletegoal") {
-    user.goal = 0;
-    user.total = 0;
+  // RESET
+  if (query.data === "reset") {
+    user.totalDeposit = 0;
+    user.totalWithdraw = 0;
     user.history = [];
     await user.save();
-    mainMenu(chatId);
+    bot.sendMessage(chatId, "🗑 Đã reset toàn bộ dữ liệu!");
   }
 
   bot.answerCallbackQuery(query.id);
-});
-
-// ====== EXPRESS SERVER (BẮT BUỘC CHO RENDER) ======
-const app = express();
-
-app.get("/", (req, res) => {
-  res.send("Bot đang chạy ✅");
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("🌐 Server is running on port " + PORT);
 });
