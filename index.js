@@ -46,39 +46,56 @@ function formatMoney(num) {
   return num.toLocaleString("vi-VN") + " VNĐ";
 }
 
+function formatDate(date) {
+  return new Date(date).toLocaleString("vi-VN");
+}
+
+function divider() {
+  return "━━━━━━━━━━━━━━━━━━━━";
+}
+
 async function getUser(msg) {
   let user = await User.findOne({ chatId: msg.chat.id });
   if (!user) {
     user = await User.create({
       chatId: msg.chat.id,
-      username: msg.from.first_name || "Khách"
+      username: msg.from.first_name || "Khách hàng"
     });
   }
   return user;
 }
 
+// ===== GIAO DIỆN CHÍNH =====
 async function mainMenu(msg) {
   const user = await getUser(msg);
   const balance = user.totalDeposit - user.totalWithdraw;
 
   const text = `
-🏦 OKEMA BANKING BOT
+🏦 *OKEMA DIGITAL BANK*
 
-👤 Khách hàng: ${user.username}
-🆔 ID: ${user.chatId}
+${divider()}
+👤 *Khách hàng:* ${user.username}
+🆔 *Mã ID:* \`${user.chatId}\`
 
-💰 SỐ DƯ HIỆN TẠI: ${formatMoney(balance)}
-────────────────────
-Chọn chức năng bên dưới:
+💳 *SỐ DƯ HIỆN TẠI*
+💰 ${formatMoney(balance)}
+
+${divider()}
+✨ Vui lòng chọn chức năng:
 `;
 
   bot.sendMessage(msg.chat.id, text, {
+    parse_mode: "Markdown",
     reply_markup: {
       inline_keyboard: [
-        [{ text: "💰 Nạp tiền", callback_data: "deposit" }],
-        [{ text: "📜 Lịch sử", callback_data: "history" }],
-        [{ text: "📊 Thống kê", callback_data: "summary" }],
-        [{ text: "🗑 Reset", callback_data: "reset" }]
+        [
+          { text: "💰 Nạp tiền", callback_data: "deposit" },
+          { text: "📜 Lịch sử", callback_data: "history" }
+        ],
+        [
+          { text: "📊 Thống kê", callback_data: "summary" },
+          { text: "🗑 Reset", callback_data: "reset" }
+        ]
       ]
     }
   });
@@ -94,16 +111,30 @@ bot.on("callback_query", async (query) => {
   const chatId = query.message.chat.id;
   const user = await User.findOne({ chatId });
 
+  if (!user) return;
+
   // ===== NẠP TIỀN =====
   if (query.data === "deposit") {
-    bot.sendMessage(chatId, "Nhập số tiền muốn nạp:");
+    bot.sendMessage(chatId, "💵 *Nhập số tiền muốn nạp:*", { parse_mode: "Markdown" });
+
     bot.once("message", async (msg) => {
       const amount = Number(msg.text);
+
       if (!isNaN(amount) && amount > 0) {
         user.totalDeposit += amount;
         user.history.push({ type: "Nạp", amount });
         await user.save();
-        bot.sendMessage(chatId, "✅ Nạp thành công!");
+
+        bot.sendMessage(chatId,
+`✅ *GIAO DỊCH THÀNH CÔNG*
+
+➕ Nạp: ${formatMoney(amount)}
+💰 Số dư mới: ${formatMoney(user.totalDeposit - user.totalWithdraw)}
+
+${divider()}`,
+          { parse_mode: "Markdown" }
+        );
+
         mainMenu(msg);
       } else {
         bot.sendMessage(chatId, "❌ Số tiền không hợp lệ.");
@@ -114,16 +145,20 @@ bot.on("callback_query", async (query) => {
   // ===== LỊCH SỬ =====
   if (query.data === "history") {
     if (user.history.length === 0) {
-      bot.sendMessage(chatId, "📜 Chưa có giao dịch.");
+      bot.sendMessage(chatId, "📭 Chưa có giao dịch nào.");
       return;
     }
 
-    let text = "📜 LỊCH SỬ GIAO DỊCH:\n\n";
-    user.history.forEach((h, i) => {
-      text += `${i+1}. ${h.type} ${formatMoney(h.amount)} - ${new Date(h.date).toLocaleString("vi-VN")}\n`;
+    let text = `📜 *LỊCH SỬ GIAO DỊCH*\n${divider()}\n\n`;
+
+    user.history.slice().reverse().forEach((h, i) => {
+      text += `#${i+1} | ${h.type}\n`;
+      text += `💵 ${formatMoney(h.amount)}\n`;
+      text += `🕒 ${formatDate(h.date)}\n`;
+      text += `${divider()}\n`;
     });
 
-    bot.sendMessage(chatId, text);
+    bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
   }
 
   // ===== THỐNG KÊ =====
@@ -131,15 +166,17 @@ bot.on("callback_query", async (query) => {
     const balance = user.totalDeposit - user.totalWithdraw;
 
     const text = `
-📊 THỐNG KÊ TÀI KHOẢN
+📊 *THỐNG KÊ TÀI KHOẢN*
 
-Tổng đã nạp: ${formatMoney(user.totalDeposit)}
-Tổng đã rút: ${formatMoney(user.totalWithdraw)}
-Số dư hiện tại: ${formatMoney(balance)}
-Số giao dịch: ${user.history.length}
+${divider()}
+💰 Tổng đã nạp: ${formatMoney(user.totalDeposit)}
+💸 Tổng đã rút: ${formatMoney(user.totalWithdraw)}
+💳 Số dư: ${formatMoney(balance)}
+📈 Tổng giao dịch: ${user.history.length}
+${divider()}
 `;
 
-    bot.sendMessage(chatId, text);
+    bot.sendMessage(chatId, text, { parse_mode: "Markdown" });
   }
 
   // ===== RESET =====
@@ -148,7 +185,13 @@ Số giao dịch: ${user.history.length}
     user.totalWithdraw = 0;
     user.history = [];
     await user.save();
-    bot.sendMessage(chatId, "🗑 Đã reset toàn bộ dữ liệu!");
+
+    bot.sendMessage(chatId,
+`🗑 *ĐÃ RESET TOÀN BỘ DỮ LIỆU*
+Tài khoản đã được làm mới.`,
+      { parse_mode: "Markdown" }
+    );
+
     mainMenu(query.message);
   }
 
@@ -159,7 +202,7 @@ Số giao dịch: ${user.history.length}
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("OKEMA BANKING BOT đang hoạt động ✅");
+  res.send("OKEMA DIGITAL BANK đang hoạt động ✅");
 });
 
 const PORT = process.env.PORT || 3000;
